@@ -29,7 +29,7 @@
         }
     </script>
     <style>
-        body { background-color: #0b0e11; user-select: none; -webkit-tap-highlight-color: transparent; overflow-y: auto; }
+        body { background-color: #0b0e11; user-select: none; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; height: 100vh; overflow: hidden; }
         ::-webkit-scrollbar { display: none; }
 
         .confetti-container {
@@ -94,7 +94,6 @@
             'MIEDO': 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f628/512.webp'
         };
 
-        // Función de vibración nativa del dispositivo móvil
         const ejecutarVibracion = (patron) => {
             if (navigator.vibrate) {
                 navigator.vibrate(patron);
@@ -167,7 +166,7 @@
                         }));
                         setTrades(listaTrades);
                     }, (error) => {
-                        console.error("Error en Firestore de Firebase: ", error);
+                        console.error("Error en Firestore: ", error);
                     });
 
                 return () => unsubscribe();
@@ -216,9 +215,9 @@
                     
                     if (estado === 'WIN') { 
                         dispararConfeti(); 
-                        ejecutarVibracion([50, 60, 50]); // Doble pulso de celebración
+                        ejecutarVibracion([50, 60, 50]);
                     } else {
-                        ejecutarVibracion(90); // Pulso único más pesado para pérdidas
+                        ejecutarVibracion(90);
                     }
 
                     setActivo('');
@@ -232,7 +231,7 @@
             const eliminarTrade = async (docId) => {
                 try {
                     await db.collection('trades').doc(docId).delete();
-                    ejecutarVibracion(60); // Pulso de confirmación de borrado
+                    ejecutarVibracion(60);
                 } catch (error) {
                     console.error("Error al eliminar documento: ", error);
                 }
@@ -318,7 +317,7 @@
 
             if (!user) {
                 return (
-                    <div className="min-h-screen max-w-md mx-auto bg-bgMain flex flex-col justify-center p-6">
+                    <div className="h-screen max-w-md mx-auto bg-bgMain flex flex-col justify-center p-6">
                         <div className="bg-bgCard p-6 rounded-2xl border border-gray-800 shadow-2xl flex flex-col gap-4">
                             <div className="text-center mb-2">
                                 <h2 className="text-xl font-black text-white uppercase tracking-wider">Trading Journal</h2>
@@ -347,8 +346,9 @@
             }
 
             return (
-                <div className="min-h-screen max-w-md mx-auto bg-bgMain flex flex-col pb-24">
-                    <header className="bg-bgMain px-4 py-4 border-b border-gray-800 flex justify-between items-center sticky top-0 z-50">
+                <div className="h-screen max-w-md mx-auto bg-bgMain flex flex-col overflow-hidden relative">
+                    {/* Header Fijo */}
+                    <header className="bg-bgMain px-4 py-4 border-b border-gray-800 flex justify-between items-center z-50 shrink-0">
                         <div className="flex items-center gap-2">
                             <div className="w-2.5 h-2.5 bg-cryptoGreen rounded-full"></div>
                             <h1 className="text-base font-black tracking-wider uppercase">Trading Journal</h1>
@@ -363,9 +363,10 @@
                         </div>
                     </header>
 
-                    <main className="p-4 flex flex-col gap-5 flex-1">
+                    {/* Contenido con Scroll Independiente */}
+                    <main className="p-4 flex flex-col gap-5 flex-1 overflow-y-auto pb-24">
                         {(vista === 'calendario' || isPremium) && (
-                            <div className="bg-bgCard rounded-2xl border border-gray-800 p-4 shadow-xl">
+                            <div className="bg-bgCard rounded-2xl border border-gray-800 p-4 shadow-xl shrink-0">
                                 <div className="flex justify-between items-center mb-4">
                                     <div className="flex items-center gap-2">
                                         <button onClick={() => { ejecutarVibracion(15); setMesVista(mesVista === 0 ? 11 : mesVista - 1); }} className="w-8 h-8 rounded-lg bg-bgInput flex items-center justify-center font-bold text-gray-400">&lt;</button>
@@ -405,7 +406,7 @@
                         )}
 
                         {(vista === 'metricas' && isPremium) && (
-                            <div className="flex flex-col gap-2">
+                            <div className="flex flex-col gap-2 shrink-0">
                                 <div className="grid grid-cols-2 gap-2">
                                     <div className="bg-bgCard p-3 rounded-xl border border-gray-800">
                                         <span className="text-[9px] text-gray-500 font-bold block">PnL MES</span>
@@ -433,7 +434,7 @@
                         )}
 
                         {vista === 'calendario' && (
-                            <form onSubmit={agregarTrade} className="bg-bgCard p-4 rounded-2xl border border-gray-800 flex flex-col gap-3">
+                            <form onSubmit={agregarTrade} className="bg-bgCard p-4 rounded-2xl border border-gray-800 flex flex-col gap-3 shrink-0">
                                 <div className="grid grid-cols-2 gap-2">
                                     <input type="text" placeholder="Activo (BTC)" value={activo} onChange={(e) => setActivo(e.target.value)} className="bg-bgInput text-white px-3 py-2.5 rounded-xl text-xs font-bold outline-none"/>
                                     <input type="number" placeholder="Resultado USD" value={resultado} onChange={(e) => setResultado(e.target.value)} className="bg-bgInput text-white px-3 py-2.5 rounded-xl text-xs font-bold outline-none"/>
@@ -469,9 +470,9 @@
                             </form>
                         )}
 
-                        <div>
+                        <div className="shrink-0">
                             <h3 className="text-xs font-black text-gray-500 uppercase tracking-wider mb-2 px-1">Operaciones del Mes</h3>
-                            <div className="flex flex-col gap-2 max-h-[200px] overflow-y-auto">
+                            <div className="flex flex-col gap-2">
                                 {tradesDelMesActual.map(t => (
                                     <div key={t.id} className="bg-bgCard px-4 py-3 rounded-xl border border-gray-800 flex justify-between items-center">
                                         <div className="flex items-center gap-2">
@@ -494,12 +495,13 @@
                         </div>
                     </main>
 
-                    <nav className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-bgCard border-t border-gray-800 px-12 py-4 flex justify-between items-center z-50">
-                        <button onClick={() => { ejecutarVibracion(20); setVista('calendario'); }} className={`flex flex-col items-center gap-1 ${vista === 'calendario' ? 'text-gold' : 'text-gray-600'}`}>
-                            <span className="text-[9px] font-black uppercase tracking-wider">Calendario</span>
+                    {/* Footer Fijo Absoluto e Inamovible */}
+                    <nav className="absolute bottom-0 left-0 right-0 max-w-md mx-auto bg-bgCard border-t border-gray-800 px-12 py-5 flex justify-between items-center z-50 shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
+                        <button onClick={() => { ejecutarVibracion(20); setVista('calendario'); }} className={`flex flex-col items-center gap-1 transition ${vista === 'calendario' ? 'text-gold' : 'text-gray-600'}`}>
+                            <span className="text-[10px] font-black uppercase tracking-widest">Calendario</span>
                         </button>
-                        <button onClick={() => { ejecutarVibracion(20); setVista('metricas'); }} className={`flex flex-col items-center gap-1 ${vista === 'metricas' ? 'text-gold' : 'text-gray-600'}`}>
-                            <span className="text-[9px] font-black uppercase tracking-wider">Métricas</span>
+                        <button onClick={() => { ejecutarVibracion(20); setVista('metricas'); }} className={`flex flex-col items-center gap-1 transition ${vista === 'metricas' ? 'text-gold' : 'text-gray-600'}`}>
+                            <span className="text-[10px] font-black uppercase tracking-widest">Métricas</span>
                         </button>
                     </nav>
                 </div>
@@ -511,5 +513,3 @@
     </script>
 </body>
 </html>
-              
-         
