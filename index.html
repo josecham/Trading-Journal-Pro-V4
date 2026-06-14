@@ -55,6 +55,15 @@
                 opacity: 0;
             }
         }
+
+        /* Animación corregida para el Modal Legal */
+        .animate-fade-in {
+            animation: fadeIn 0.2s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
     </style>
 </head>
 <body class="text-gray-200 font-sans antialiased">
@@ -414,5 +423,164 @@
                                         <span className="text-sm font-black text-white">${totalPnlMes}</span>
                                     </div>
                                     <div className="bg-bgCard p-3 rounded-xl border border-gold/20">
-                                        <span className="text-[9px]
+                                        <span className="text-[9px] text-gold font-bold block">ACUMULADO</span>
+                                        <span className="text-sm font-black text-white">${totalPnlAcumulado}</span>
+                                    </div>
+                                </div>
+                                
+                                <div className="bg-bgCard p-3 rounded-xl border border-gray-800 flex items-center justify-between">
+                                    <div>
+                                        <span className="text-[9px] text-gray-400 font-bold block uppercase tracking-wider">Métrica Psicotrading</span>
+                                        <span className="text-xs font-black text-white block mt-0.5">Emoción Dominante</span>
+                                        <span className="text-[10px] text-gray-500 font-medium">{emocionDominante.texto}</span>
+                                    </div>
+                                    <div className="w-12 h-12 rounded-xl flex items-center justify-center p-2 bg-bgInput">
+                                        {emocionDominante.key !== 'VACIO' ? (
+                                            <img src={URL_CARITAS[emocionDominante.key]} alt="Emoción Dominante" className="w-full h-full object-contain" />
+                                        ) : '❔'}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {vista === 'calendario' && (
+                            <form onSubmit={agregarTrade} className="bg-bgCard p-4 rounded-2xl border border-gray-800 flex flex-col gap-3 shrink-0">
+                                <div className="grid grid-cols-2 gap-2">
+                                    <input type="text" placeholder="Activo (BTC)" value={activo} onChange={(e) => setActivo(e.target.value)} className="bg-bgInput text-white px-3 py-2.5 rounded-xl text-xs font-bold outline-none"/>
+                                    <input type="number" placeholder="Resultado USD" value={resultado} onChange={(e) => setResultado(e.target.value)} className="bg-bgInput text-white px-3 py-2.5 rounded-xl text-xs font-bold outline-none"/>
+                                </div>
+                                
+                                <div className="flex flex-col gap-1.5">
+                                    <span className="text-[10px] text-gray-500 font-bold uppercase px-1">Psicotrading (Estado Emocional)</span>
+                                    <div className="grid grid-cols-4 gap-1.5">
+                                        {[
+                                            { id: 'CALMO', label: 'Calmo' },
+                                            { id: 'ANSIOSO', label: 'Ansioso' },
+                                            { id: 'ENOJADO', label: 'Enojado' },
+                                            { id: 'MIEDO', label: 'Miedo' }
+                                        ].map(item => (
+                                            <button 
+                                                key={item.id} 
+                                                type="button" 
+                                                onClick={() => { ejecutarVibracion(15); setEmocion(item.id); }}
+                                                className={`py-2 rounded-xl flex flex-col items-center justify-center border transition ${emocion === item.id ? 'bg-bgInput border-gold text-white' : 'bg-bgInput/40 border-transparent text-gray-400'}`}
+                                            >
+                                                <img src={URL_CARITAS[item.id]} alt={item.label} className="w-6 h-6 object-contain" />
+                                                <span className="text-[8px] font-bold uppercase mt-1 tracking-wide">{item.label}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-2">
+                                    <button type="button" onClick={() => { ejecutarVibracion(20); setEstado('WIN'); }} className={`py-2 rounded-xl text-xs font-bold transition ${estado === 'WIN' ? 'bg-cryptoGreen text-black' : 'bg-bgInput text-gray-400'}`}>WIN</button>
+                                    <button type="button" onClick={() => { ejecutarVibracion(20); setEstado('LOSS'); }} className={`py-2 rounded-xl text-xs font-bold transition ${estado === 'LOSS' ? 'bg-cryptoRed text-white' : 'bg-bgInput text-gray-400'}`}>LOSS</button>
+                                </div>
+                                <button type="submit" className="bg-gold text-black font-black py-3 rounded-xl text-xs uppercase tracking-wider">Guardar en la Nube</button>
+                            </form>
+                        )}
+
+                        <div className="shrink-0">
+                            <h3 className="text-xs font-black text-gray-500 uppercase tracking-wider mb-2 px-1">Operaciones del Mes</h3>
+                            <div className="flex flex-col gap-2">
+                                {tradesDelMesActual.map(t => (
+                                    <div key={t.id} className="bg-bgCard px-4 py-3 rounded-xl border border-gray-800 flex justify-between items-center">
+                                        <div className="flex items-center gap-2">
+                                            <span className="bg-bgInput/60 p-1 rounded-lg flex items-center justify-center w-8 h-8">
+                                                <img 
+                                                    src={URL_CARITAS[t.emocion] || URL_CARITAS['CALMO']} 
+                                                    alt="Emocion" 
+                                                    className="w-5 h-5 object-contain" 
+                                                />
+                                            </span>
+                                            <span className="text-xs font-black text-white">{t.activo} (Día {t.dia})</span>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            <span className={`font-bold text-xs ${t.resultado >= 0 ? 'text-cryptoGreen' : 'text-cryptoRed'}`}>${t.resultado}</span>
+                                            <button onClick={() => eliminarTrade(t.docId)} className="text-gray-500 hover:text-cryptoRed font-bold text-lg px-1">&times;</button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </main>
+
+                    {/* Footer Rediseñado y Altamente Visible */}
+                    <nav className="absolute bottom-0 left-0 right-0 max-w-md mx-auto bg-bgCard border-t border-gray-800 px-6 py-4 flex justify-between items-center z-50 shadow-[0_-8px_30px_rgba(0,0,0,0.7)]">
+                        <button 
+                            onClick={() => { ejecutarVibracion(20); setVista('calendario'); }} 
+                            className={`flex-1 flex flex-col items-center gap-1 py-1 transition ${vista === 'calendario' ? 'text-gold scale-105' : 'text-gray-300 hover:text-white'}`}
+                        >
+                            <span className="text-[18px]">📅</span>
+                            <span className="text-[11px] font-black uppercase tracking-wider">Calendario</span>
+                        </button>
                         
+                        <button 
+                            onClick={() => { ejecutarVibracion(20); setVista('metricas'); }} 
+                            className={`flex-1 flex flex-col items-center gap-1 py-1 transition ${vista === 'metricas' ? 'text-gold scale-105' : 'text-gray-300 hover:text-white'}`}
+                        >
+                            <span className="text-[18px]">📊</span>
+                            <span className="text-[11px] font-black uppercase tracking-wider">Métricas</span>
+                        </button>
+
+                        <button 
+                            onClick={() => { ejecutarVibracion(20); setMostrarTerminos(true); }} 
+                            className="flex-1 flex flex-col items-center gap-1 py-1 text-gray-300 hover:text-white transition"
+                        >
+                            <span className="text-[18px]">📜</span>
+                            <span className="text-[11px] font-black uppercase tracking-wider text-center leading-tight">Legal</span>
+                        </button>
+                    </nav>
+
+                    {/* Ventana Emergente de Términos y Privacidad */}
+                    {mostrarTerminos && (
+                        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[100] p-6 animate-fade-in">
+                            <div className="bg-bgCard w-full max-w-sm rounded-2xl border border-gray-800 flex flex-col max-h-[80vh] shadow-2xl">
+                                <div className="p-4 border-b border-gray-800 flex justify-between items-center">
+                                    <h3 className="text-xs font-black tracking-widest uppercase text-gold">Información Legal</h3>
+                                    <button 
+                                        onClick={() => { ejecutarVibracion(15); setMostrarTerminos(false); }} 
+                                        className="text-gray-400 hover:text-white text-xl font-bold px-2"
+                                    >
+                                        &times;
+                                    </button>
+                                </div>
+                                <div className="p-4 overflow-y-auto text-[11px] text-gray-400 space-y-4 font-mono leading-relaxed">
+                                    {/* SECCIÓN 1: TÉRMINOS Y CONDICIONES */}
+                                    <div>
+                                        <h4 className="text-white font-bold uppercase text-[11px] tracking-wider mb-1">Términos y Condiciones</h4>
+                                        <p className="mb-2"><span className="text-gray-300 font-bold">1. Aceptación:</span> Al utilizar este Trading Journal en la nube, el usuario acepta de manera estricta todas las pautas descritas en este documento.</p>
+                                        <p className="mb-2"><span className="text-gray-300 font-bold">2. Naturaleza del Servicio:</span> Esta aplicación funciona exclusivamente como una bitácora o diario de seguimiento personal. Bajo ninguna circunstancia constituye, provee o reemplaza asesoría financiera, señales de inversión ni recomendaciones de compra/venta de activos.</p>
+                                        <p className="mb-2"><span className="text-gray-300 font-bold">3. Responsabilidad:</span> El trading en mercados financieros conlleva un alto riesgo. El usuario es el único responsable de sus decisiones, ganancias y pérdidas económicas generadas en su operatoria diaria.</p>
+                                    </div>
+
+                                    <hr className="border-gray-800 my-2" />
+
+                                    {/* SECCIÓN 2: POLÍTICA DE PRIVACIDAD */}
+                                    <div>
+                                        <h4 className="text-gold font-bold uppercase text-[11px] tracking-wider mb-1">Política de Privacidad y Protección de Datos Personales</h4>
+                                        <p className="mb-2">En Trading Journal Cloud nos tomamos muy en serio la privacidad de su información.</p>
+                                        <p className="mb-2">Los datos recolectados (correo electrónico de registro y bitácora de operaciones) son almacenados de forma segura mediante la infraestructura de Google Firebase con el único propósito de sincronizar su cuenta y permitirle visualizar sus métricas en tiempo real.</p>
+                                        <p className="mb-2">No vendemos, transferimos ni compartimos sus datos personales ni su historial de trading con ninguna empresa, tercero o entidad externa. Usted conserva el derecho absoluto sobre su información y puede solicitar la eliminación de su cuenta y todos sus registros asociados en cualquier momento desde la configuración de la aplicación.</p>
+                                    </div>
+                                </div>
+                                <div className="p-3 border-t border-gray-800 bg-bgMain/40 text-center">
+                                    <button 
+                                        onClick={() => { ejecutarVibracion(20); setMostrarTerminos(false); }} 
+                                        className="w-full bg-gold text-black font-black text-xs py-2.5 rounded-xl uppercase tracking-wider"
+                                    >
+                                        Entendido y Aceptar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
