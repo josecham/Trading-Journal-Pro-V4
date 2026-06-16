@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+       <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -56,7 +56,6 @@
             }
         }
 
-        /* Animación corregida para el Modal Legal */
         .animate-fade-in {
             animation: fadeIn 0.2s ease-out forwards;
         }
@@ -488,7 +487,7 @@
                                         <div className="flex items-center gap-2">
                                             <span className="bg-bgInput/60 p-1 rounded-lg flex items-center justify-center w-8 h-8">
                                                 <img 
-                                                    src={URL_CARITAS[t.emocion] || URL_CARITAS['CALMO']} 
+                                                    src={URL_CARITAS[t.emocion || 'CALMO'] || URL_CARITAS['CALMO']} 
                                                     alt="Emocion" 
                                                     className="w-5 h-5 object-contain" 
                                                 />
@@ -561,7 +560,7 @@
                                         <h4 className="text-gold font-bold uppercase text-[11px] tracking-wider mb-1">Política de Privacidad y Protección de Datos Personales</h4>
                                         <p className="mb-2">En Trading Journal Cloud nos tomamos muy en serio la privacidad de su información.</p>
                                         <p className="mb-2">Los datos recolectados (correo electrónico de registro y bitácora de operaciones) son almacenados de forma segura mediante la infraestructura de Google Firebase con el único propósito de sincronizar su cuenta y permitirle visualizar sus métricas en tiempo real.</p>
-                                        <p className="mb-2">No vendemos, transferimos ni compartimos sus datos personales ni su historial de trading con ninguna empresa, tercero o entidad externa. Usted conserva el derecho absoluto sobre su información.</p>
+                                        <p className="mb-2">No vendemos, transferimos ni compartimos sus datos personales ni su historial de trading con ninguna empresa, tercero o entidad externa. Usted conserva el derecho absoluto sobre su información y puede solicitar la eliminación de su cuenta y todos sus registros asociados en cualquier momento desde la configuración de la aplicación.</p>
                                     </div>
                                 </div>
                                 <div className="p-3 border-t border-gray-800 bg-bgMain/40 text-center">
@@ -583,4 +582,4 @@
         root.render(<App />);
     </script>
 </body>
-</html>
+</html>  
