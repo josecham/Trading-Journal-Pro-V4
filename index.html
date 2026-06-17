@@ -32,6 +32,7 @@
         body { background-color: #0b0e11; user-select: none; -webkit-tap-highlight-color: transparent; overflow-y: auto; }
         ::-webkit-scrollbar { display: none; }
 
+        /* Estilos y animaciones custom para el confeti */
         .confetti-container {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
@@ -87,14 +88,6 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // URLs fijas de alta calidad para las caritas (estilo Apple de la primera captura)
-        const URL_CARITAS = {
-            'CALMO': 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f929/512.webp', // Carita ojos de estrella / feliz
-            'ANSIOSO': 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f630/512.webp', // Carita ansiosa sudando
-            'ENOJADO': 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f621/512.webp', // Carita roja enojada
-            'MIEDO': 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f628/512.webp'    // Carita con miedo / boca abierta
-        };
-
         const dispararConfeti = () => {
             const container = document.createElement('div');
             container.className = 'confetti-container';
@@ -134,7 +127,7 @@
             const [activo, setActivo] = useState('');
             const [resultado, setResultado] = useState('');
             const [estado, setEstado] = useState('WIN');
-            const [emocion, setEmocion] = useState('CALMO'); // Guardamos la key en vez de la carita directa
+            const [emocion, setEmocion] = useState('😊');
             const [diaSeleccionado, setDiaSeleccionado] = useState(hoy.getDate());
             
             const chartRef = useRef(null);
@@ -194,7 +187,7 @@
                     activo: activo.toUpperCase(),
                     resultado: estado === 'WIN' ? Math.abs(monto) : -Math.abs(monto),
                     estado,
-                    emocion, // Almacena 'CALMO', 'ANSIOSO', etc.
+                    emocion,
                     dia: parseInt(diaSeleccionado),
                     mes: mesVista,
                     año: añoVista
@@ -205,7 +198,7 @@
                     if (estado === 'WIN') { dispararConfeti(); }
                     setActivo('');
                     setResultado('');
-                    setEmocion('CALMO');
+                    setEmocion('😊');
                 } catch (error) {
                     console.error("Error al guardar trade: ", error);
                 }
@@ -235,15 +228,15 @@
             const totalPnlAcumulado = trades.reduce((acc, t) => acc + t.resultado, 0);
 
             const obtenerEmocionDominante = () => {
-                if (tradesDelMesActual.length === 0) return { key: 'VACIO', texto: 'Sin datos' };
+                if (tradesDelMesActual.length === 0) return { emoji: '❔', texto: 'Sin datos' };
                 
                 const conteo = {};
                 tradesDelMesActual.forEach(t => {
-                    const emo = t.emocion || 'CALMO';
+                    const emo = t.emocion || '😊';
                     conteo[emo] = (conteo[emo] || 0) + 1;
                 });
 
-                let maxEmo = 'CALMO';
+                let maxEmo = '😊';
                 let maxConteo = 0;
                 for (const key in conteo) {
                     if (conteo[key] > maxConteo) {
@@ -253,13 +246,13 @@
                 }
 
                 const mapaTextos = {
-                    'CALMO': 'Calmo / Focalizado',
-                    'ANSIOSO': 'Ansioso / Apurado',
-                    'ENOJADO': 'Enojado (Furia)',
-                    'MIEDO': 'Miedo al mercado'
+                    '😊': 'Calmo / Focalizado',
+                    '😰': 'Ansioso / Apurado',
+                    '😡': 'Enojado (Furia)',
+                    '😨': 'Miedo al mercado'
                 };
 
-                return { key: maxEmo, texto: mapaTextos[maxEmo] || 'Desconocido' };
+                return { emoji: maxEmo, texto: mapaTextos[maxEmo] || 'Desconocido' };
             };
 
             const emocionDominante = obtenerEmocionDominante();
@@ -404,10 +397,11 @@
                                         <span className="text-xs font-black text-white block mt-0.5">Emoción Dominante</span>
                                         <span className="text-[10px] text-gray-500 font-medium">{emocionDominante.texto}</span>
                                     </div>
-                                    <div className="w-12 h-12 rounded-xl flex items-center justify-center p-2 bg-bgInput">
-                                        {emocionDominante.key !== 'VACIO' ? (
-                                            <img src={URL_CARITAS[emocionDominante.key]} alt="Emoción Dominante" className="w-full h-full object-contain" />
-                                        ) : '❔'}
+                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl ${
+                                        emocionDominante.emoji === '😊' ? 'bg-cryptoGreen/10 border border-cryptoGreen/20' :
+                                        emocionDominante.emoji === '❔' ? 'bg-bgInput' : 'bg-cryptoRed/10 border border-cryptoRed/20'
+                                    }`}>
+                                        {emocionDominante.emoji}
                                     </div>
                                 </div>
                             </div>
@@ -424,20 +418,19 @@
                                     <span className="text-[10px] text-gray-500 font-bold uppercase px-1">Psicotrading (Estado Emocional)</span>
                                     <div className="grid grid-cols-4 gap-1.5">
                                         {[
-                                            { id: 'CALMO', label: 'Calmo' },
-                                            { id: 'ANSIOSO', label: 'Ansioso' },
-                                            { id: 'ENOJADO', label: 'Enojado' },
-                                            { id: 'MIEDO', label: 'Miedo' }
+                                            { emoji: '😊', label: 'Calmo' },
+                                            { emoji: '😰', label: 'Ansioso' },
+                                            { emoji: '😡', label: 'Enojado' },
+                                            { emoji: '😨', label: 'Miedo' }
                                         ].map(item => (
                                             <button 
-                                                key={item.id} 
+                                                key={item.emoji} 
                                                 type="button" 
-                                                onClick={() => setEmocion(item.id)}
-                                                className={`py-2 rounded-xl flex flex-col items-center justify-center border transition ${emocion === item.id ? 'bg-bgInput border-gold text-white' : 'bg-bgInput/40 border-transparent text-gray-400'}`}
+                                                onClick={() => setEmocion(item.emoji)}
+                                                className={`py-2 rounded-xl flex flex-col items-center justify-center border transition ${emocion === item.emoji ? 'bg-bgInput border-gold text-white' : 'bg-bgInput/40 border-transparent text-gray-400'}`}
                                             >
-                                                {/* Imagen fija del Emoji en alta definición */}
-                                                <img src={URL_CARITAS[item.id]} alt={item.label} className="w-6 h-6 object-contain" />
-                                                <span className="text-[8px] font-bold uppercase mt-1 tracking-wide">{item.label}</span>
+                                                <span className="text-base">{item.emoji}</span>
+                                                <span className="text-[8px] font-bold uppercase mt-0.5">{item.label}</span>
                                             </button>
                                         ))}
                                     </div>
@@ -457,13 +450,8 @@
                                 {tradesDelMesActual.map(t => (
                                     <div key={t.id} className="bg-bgCard px-4 py-3 rounded-xl border border-gray-800 flex justify-between items-center">
                                         <div className="flex items-center gap-2">
-                                            <span className="bg-bgInput/60 p-1 rounded-lg flex items-center justify-center w-8 h-8">
-                                                {/* Asegura compatibilidad con registros viejos que usaran el string crudo */}
-                                                <img 
-                                                    src={URL_CARITAS[t.emocion] || URL_CARITAS['CALMO']} 
-                                                    alt="Emocion" 
-                                                    className="w-5 h-5 object-contain" 
-                                                />
+                                            <span className="text-base bg-bgInput/60 p-1.5 rounded-lg flex items-center justify-center w-7 h-7" title="Sensación al operar">
+                                                {t.emocion || '😊'}
                                             </span>
                                             <span className="text-xs font-black text-white">{t.activo} (Día {t.dia})</span>
                                         </div>
@@ -493,6 +481,4 @@
         root.render(<App />);
     </script>
 </body>
-</html>    
- 
-        
+</html>
