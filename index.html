@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Trading Journal V6 Stable</title>
+    <title>Trading Journal V6 Ultra Stable</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -34,24 +34,168 @@
         .confetti-container { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 9999; overflow: hidden; }
         .confetti-piece { position: absolute; top: -10px; width: 10px; height: 10px; opacity: 0.8; border-radius: 2px; animation: fall linear forwards; }
         @keyframes fall { 0% { transform: translateY(-20px) rotate(0deg); opacity: 1; } 100% { transform: translateY(105vh) rotate(720deg); opacity: 0; } }
-        .animate-fade-in { animation: fadeIn 0.2s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        .hidden-view { display: none !important; }
     </style>
 </head>
 <body class="text-gray-200 font-sans antialiased">
-    <div id="root"></div>
 
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <div id="auth-container" class="h-screen max-w-md mx-auto bg-bgMain flex flex-col justify-center p-6">
+        <div class="bg-bgCard p-6 rounded-2xl border border-gray-800 shadow-2xl flex flex-col gap-4">
+            <div class="text-center mb-2">
+                <h2 class="text-xl font-black text-white uppercase tracking-wider">Trading Journal</h2>
+                <p class="text-xs text-gray-400 mt-1">Sincronización en la Nube</p>
+            </div>
+            <form id="auth-form" class="flex flex-col gap-3">
+                <input id="auth-email" type="email" placeholder="Correo electrónico" required class="bg-bgInput text-white px-4 py-3 rounded-xl text-xs font-bold outline-none border border-transparent focus:border-gold">
+                <input id="auth-password" type="password" placeholder="Contraseña" required class="bg-bgInput text-white px-4 py-3 rounded-xl text-xs font-bold outline-none border border-transparent focus:border-gold">
+                <p id="auth-error" class="text-[10px] text-cryptoRed font-bold text-center hidden"></p>
+                <button type="submit" id="auth-submit-btn" class="w-full bg-gold text-black font-black py-3 rounded-xl text-xs uppercase tracking-widest mt-1">Ingresar</button>
+            </form>
+            <button type="button" id="auth-toggle-btn" class="text-[11px] text-gray-500 font-bold hover:text-white underline text-center">¿No tenés cuenta? Registrate gratis</button>
+        </div>
+    </div>
+
+    <div id="app-container" class="h-screen max-w-md mx-auto bg-bgMain flex flex-col overflow-hidden relative hidden-view">
+        <header class="bg-bgMain px-4 py-4 border-b border-gray-800 flex justify-between items-center z-50 shrink-0">
+            <div class="flex items-center gap-2">
+                <div class="w-2.5 h-2.5 bg-cryptoGreen rounded-full"></div>
+                <h1 class="text-base font-black tracking-wider uppercase">Trading Journal</h1>
+            </div>
+            <div class="flex items-center gap-2">
+                <a href="https://www.facebook.com/share/g/1BBVwh32q1/" target="_blank" rel="noopener noreferrer" class="text-[9px] text-white font-black bg-blue-600/20 border border-blue-500/30 px-2 py-1 rounded-lg hover:bg-blue-600/40 transition">COMUNIDAD 👥</a>
+                <button id="logout-btn" class="text-[9px] text-cryptoRed font-bold bg-cryptoRed/10 border border-cryptoRed/20 px-2 py-1 rounded-lg">CERRAR SESIÓN</button>
+            </div>
+        </header>
+
+        <main class="p-4 flex flex-col gap-5 flex-1 overflow-y-auto pb-28">
+            <div class="bg-bgCard rounded-2xl border border-gray-800 p-4 shadow-xl shrink-0">
+                <div class="flex justify-between items-center mb-4">
+                    <div class="flex items-center gap-2">
+                        <button type="button" id="prev-month-btn" class="w-8 h-8 rounded-lg bg-bgInput flex items-center justify-center font-bold text-gray-400">&lt;</button>
+                        <h2 id="month-title" class="text-sm font-black text-white uppercase tracking-wide min-w-[110px] text-center">Enero <span class="text-gray-500 font-mono text-xs">2026</span></h2>
+                        <button type="button" id="next-month-btn" class="w-8 h-8 rounded-lg bg-bgInput flex items-center justify-center font-bold text-gray-400">&gt;</button>
+                    </div>
+                    <span id="month-pnl-badge" class="text-xs font-bold font-mono px-2 py-1 rounded text-cryptoGreen bg-cryptoGreen/10">$0.00</span>
+                </div>
+
+                <div id="calendar-view">
+                    <div class="grid grid-cols-7 gap-1 text-center mb-1">
+                        <span class="text-[9px] text-gray-500 font-bold">DOM</span>
+                        <span class="text-[9px] text-gray-500 font-bold">LUN</span>
+                        <span class="text-[9px] text-gray-500 font-bold">MAR</span>
+                        <span class="text-[9px] text-gray-500 font-bold">MIÉ</span>
+                        <span class="text-[9px] text-gray-500 font-bold">JUE</span>
+                        <span class="text-[9px] text-gray-500 font-bold">VIE</span>
+                        <span class="text-[9px] text-gray-500 font-bold">SÁB</span>
+                    </div>
+                    <div id="calendar-grid" class="grid grid-cols-7 gap-1.5"></div>
+                </div>
+
+                <div id="chart-view" class="w-full relative h-[180px] hidden-view">
+                    <canvas id="metrics-chart"></canvas>
+                </div>
+            </div>
+
+            <div id="metrics-widgets" class="flex flex-col gap-2 shrink-0 hidden-view">
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="bg-bgCard p-3 rounded-xl border border-gray-800">
+                        <span class="text-[9px] text-gray-500 font-bold block">PnL MES</span>
+                        <span id="widget-pnl-mes" class="text-sm font-black text-white">$0.00</span>
+                    </div>
+                    <div class="bg-bgCard p-3 rounded-xl border border-gold/20">
+                        <span class="text-[9px] text-gold font-bold block">ACUMULADO</span>
+                        <span id="widget-pnl-acumulado" class="text-sm font-black text-white">$0.00</span>
+                    </div>
+                </div>
+                <div class="bg-bgCard p-3 rounded-xl border border-gray-800 flex items-center justify-between">
+                    <div>
+                        <span class="text-[9px] text-gray-400 font-bold block uppercase tracking-wider">Métrica Psicotrading</span>
+                        <span class="text-xs font-black text-white block mt-0.5">Emoción Dominante</span>
+                        <span id="widget-emocion-texto" class="text-[10px] text-gray-500 font-medium">Sin datos</span>
+                    </div>
+                    <div id="widget-emocion-emoji" class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl bg-bgInput">❔</div>
+                </div>
+            </div>
+
+            <form id="trade-form" class="bg-bgCard p-4 rounded-2xl border border-gray-800 flex flex-col gap-3 shrink-0">
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="text" id="trade-activo" placeholder="Activo (BTC)" required class="bg-bgInput text-white px-3 py-2.5 rounded-xl text-xs font-bold outline-none">
+                    <input type="number" step="any" id="trade-resultado" placeholder="Resultado USD" required class="bg-bgInput text-white px-3 py-2.5 rounded-xl text-xs font-bold outline-none">
+                </div>
+                <div class="flex flex-col gap-1.5">
+                    <span class="text-[10px] text-gray-500 font-bold uppercase px-1">Psicotrading (Estado Emocional)</span>
+                    <div class="grid grid-cols-4 gap-1.5">
+                        <button type="button" data-emo="CALMO" class="emo-btn py-2 rounded-xl flex flex-col items-center justify-center border bg-bgInput border-gold text-white">
+                            <span class="text-2xl mb-1">😎</span><span class="text-[8px] font-bold uppercase tracking-wide">Calmo</span>
+                        </button>
+                        <button type="button" data-emo="ANSIOSO" class="emo-btn py-2 rounded-xl flex flex-col items-center justify-center border bg-bgInput/40 border-transparent text-gray-400">
+                            <span class="text-2xl mb-1">😰</span><span class="text-[8px] font-bold uppercase tracking-wide">Ansioso</span>
+                        </button>
+                        <button type="button" data-emo="ENOJADO" class="emo-btn py-2 rounded-xl flex flex-col items-center justify-center border bg-bgInput/40 border-transparent text-gray-400">
+                            <span class="text-2xl mb-1">😡</span><span class="text-[8px] font-bold uppercase tracking-wide">Enojado</span>
+                        </button>
+                        <button type="button" data-emo="MIEDO" class="emo-btn py-2 rounded-xl flex flex-col items-center justify-center border bg-bgInput/40 border-transparent text-gray-400">
+                            <span class="text-2xl mb-1">😨</span><span class="text-[8px] font-bold uppercase tracking-wide">Miedo</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <button type="button" id="status-win-btn" class="py-2 rounded-xl text-xs font-bold bg-cryptoGreen text-black">WIN</button>
+                    <button type="button" id="status-loss-btn" class="py-2 rounded-xl text-xs font-bold bg-bgInput text-gray-400">LOSS</button>
+                </div>
+                <button type="submit" class="bg-gold text-black font-black py-3 rounded-xl text-xs uppercase tracking-wider">Guardar en la Nube</button>
+            </form>
+
+            <div id="trades-list-container" class="shrink-0">
+                <h3 class="text-xs font-black text-gray-500 uppercase tracking-wider mb-2 px-1">Operaciones del Mes</h3>
+                <div id="trades-list" class="flex flex-col gap-2"></div>
+            </div>
+        </main>
+
+        <nav class="absolute bottom-0 left-0 right-0 max-w-md mx-auto bg-bgCard border-t border-gray-800 px-6 py-4 flex justify-between items-center z-50 shadow-[0_-8px_30px_rgba(0,0,0,0.7)]">
+            <button type="button" id="nav-calendar" class="flex-1 flex flex-col items-center gap-1 py-1 text-gold scale-105">
+                <span class="text-[18px]">📅</span><span class="text-[11px] font-black uppercase tracking-wider">Calendario</span>
+            </button>
+            <button type="button" id="nav-metrics" class="flex-1 flex flex-col items-center gap-1 py-1 text-gray-300 hover:text-white">
+                <span class="text-[18px]">📊</span><span class="text-[11px] font-black uppercase tracking-wider">Métricas</span>
+            </button>
+            <button type="button" id="nav-legal" class="flex-1 flex flex-col items-center gap-1 py-1 text-gray-300 hover:text-white">
+                <span class="text-[18px]">📜</span><span class="text-[11px] font-black uppercase tracking-wider text-center leading-tight">Legal</span>
+            </button>
+        </nav>
+
+        <div id="legal-modal" class="fixed inset-0 bg-black/80 flex items-center justify-center z-[100] p-6 hidden-view">
+            <div class="bg-bgCard w-full max-w-sm rounded-2xl border border-gray-800 flex flex-col max-h-[80vh] shadow-2xl">
+                <div class="p-4 border-b border-gray-800 flex justify-between items-center">
+                    <h3 class="text-xs font-black tracking-widest uppercase text-gold">Información Legal</h3>
+                    <button type="button" id="close-legal-btn" class="text-gray-400 hover:text-white text-xl font-bold px-2">&times;</button>
+                </div>
+                <div class="p-4 overflow-y-auto text-[11px] text-gray-400 space-y-4 font-mono leading-relaxed">
+                    <div>
+                        <h4 class="text-white font-bold uppercase text-[11px] tracking-wider mb-1">Términos y Condiciones</h4>
+                        <p class="mb-2"><span class="text-gray-300 font-bold">1. Aceptación:</span> Al utilizar este Trading Journal en la nube, el usuario acepta de manera estricta todas las pautas.</p>
+                        <p class="mb-2"><span class="text-gray-300 font-bold">2. Naturaleza:</span> Esta aplicación funciona exclusivamente como una bitácora personal. No constituye asesoría financiera.</p>
+                    </div>
+                    <hr class="border-gray-800 my-2">
+                    <div>
+                        <h4 class="text-gold font-bold uppercase text-[11px] tracking-wider mb-1">Política de Privacidad</h4>
+                        <p class="mb-2">Los datos de operaciones son almacenados de forma segura mediante Google Firebase.</p>
+                        <p class="mb-2">No compartimos ni vendemos su historial con terceros. Usted conserva el derecho absoluto de borrar sus registros.</p>
+                    </div>
+                </div>
+                <div class="p-3 border-t border-gray-800 bg-bgMain/40 text-center">
+                    <button type="button" id="accept-legal-btn" class="w-full bg-gold text-black font-black text-xs py-2.5 rounded-xl uppercase tracking-wider">Entendido y Aceptar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
     <script>
-        const { useState, useEffect, useRef } = React;
-        const e = React.createElement;
-
+        // CONFIGURACIÓN DE FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyAts93tv8WY702grlHPGnh6ID1QeR_3XQc",
             authDomain: "tradingjournalpro-3507c.firebaseapp.com",
@@ -69,7 +213,50 @@
         const db = firebase.firestore();
 
         const TEXTO_EMOJIS = { 'CALMO': '😎', 'ANSIOSO': '😰', 'ENOJADO': '😡', 'MIEDO': '😨' };
+        const MAPA_TEXTOS = { 'CALMO': 'Calmo / Focalizado', 'ANSIOSO': 'Ansioso / Apurado', 'ENOJADO': 'Enojado (Furia)', 'MIEDO': 'Miedo al mercado' };
+        const NOMBRE_MESES = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
+        // ESTADO GLOBAL DE LA APLICACIÓN
+        let usuarioActual = null;
+        let isRegistering = false;
+        let trades = [];
+        
+        const hoy = new Date();
+        let mesVista = hoy.getMonth();
+        let añoVista = hoy.getFullYear();
+        let diaSeleccionado = hoy.getDate();
+        
+        let vistaActual = 'calendario'; // 'calendario' o 'metricas'
+        let estadoSeleccionado = 'WIN'; // 'WIN' o 'LOSS'
+        let emocionSeleccionada = 'CALMO';
+        let chartInstance = null;
+
+        // ELEMENTOS DEL DOM
+        const authContainer = document.getElementById('auth-container');
+        const appContainer = document.getElementById('app-container');
+        const authForm = document.getElementById('auth-form');
+        const authEmail = document.getElementById('auth-email');
+        const authPassword = document.getElementById('auth-password');
+        const authError = document.getElementById('auth-error');
+        const authSubmitBtn = document.getElementById('auth-submit-btn');
+        const authToggleBtn = document.getElementById('auth-toggle-btn');
+        
+        const monthTitle = document.getElementById('month-title');
+        const monthPnlBadge = document.getElementById('month-pnl-badge');
+        const calendarGrid = document.getElementById('calendar-grid');
+        const tradesList = document.getElementById('trades-list');
+        
+        const calendarView = document.getElementById('calendar-view');
+        const chartView = document.getElementById('chart-view');
+        const metricsWidgets = document.getElementById('metrics-widgets');
+        const tradeForm = document.getElementById('trade-form');
+        
+        const widgetPnlMes = document.getElementById('widget-pnl-mes');
+        const widgetPnlAcumulado = document.getElementById('widget-pnl-acumulado');
+        const widgetEmocionTexto = document.getElementById('widget-emocion-texto');
+        const widgetEmocionEmoji = document.getElementById('widget-emocion-emoji');
+
+        // EFECTOS DE SONIDO Y VIBRACIÓN
         const ejecutarVibracion = (patron) => { if (navigator.vibrate) navigator.vibrate(patron); };
 
         const dispararConfeti = () => {
@@ -89,229 +276,320 @@
             setTimeout(() => { container.remove(); }, 4000);
         };
 
-        function App() {
-            const hoy = new Date();
-            const [user, setUser] = useState(null);
-            const [email, setEmail] = useState('');
-            const [password, setPassword] = useState('');
-            const [isRegistering, setIsRegistering] = useState(false);
-            const [authError, setAuthError] = useState('');
-            const [mesVista, setMesVista] = useState(hoy.getMonth());
-            const [añoVista, setAñoVista] = useState(hoy.getFullYear());
-            const [vista, setVista] = useState('calendario'); 
-            const [trades, setTrades] = useState([]);
-            const [mostrarTerminos, setMostrarTerminos] = useState(false);
-            const [activo, setActivo] = useState('');
-            const [resultado, setResultado] = useState('');
-            const [estado, setEstado] = useState('WIN');
-            const [emocion, setEmocion] = useState('CALMO');
-            const [diaSeleccionado, setDiaSeleccionado] = useState(hoy.getDate());
-            
-            const chartRef = useRef(null);
-            const chartInstance = useRef(null);
+        // ESCUCHADOR DE AUTENTICACIÓN
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                usuarioActual = user;
+                authContainer.classList.add('hidden-view');
+                appContainer.classList.remove('hidden-view');
+                conectarFirestore();
+            } else {
+                usuarioActual = null;
+                trades = [];
+                authContainer.classList.remove('hidden-view');
+                appContainer.classList.add('hidden-view');
+            }
+        });
 
-            const safeFixed = (val) => {
-                const n = parseFloat(val);
-                return isNaN(n) ? "0.00" : n.toFixed(2);
-            };
+        // MANEJO DE LOGIN / REGISTRO
+        authToggleBtn.addEventListener('click', () => {
+            ejecutarVibracion(20);
+            isRegistering = !isRegistering;
+            if (isRegistering) {
+                authSubmitBtn.innerText = 'Crear Cuenta Cloud';
+                authToggleBtn.innerText = '¿Ya tenés cuenta? Iniciá sesión';
+            } else {
+                authSubmitBtn.innerText = 'Ingresar';
+                authToggleBtn.innerText = '¿No tenés cuenta? Registrate gratis';
+            }
+        });
 
-            useEffect(() => {
-                return auth.onAuthStateChanged((currentUser) => {
-                    setUser(currentUser);
-                    if (!currentUser) setTrades([]);
-                });
-            }, []);
+        authForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            authError.classList.add('hidden');
+            const email = authEmail.value;
+            const password = authPassword.value;
 
-            useEffect(() => {
-                if (!user) return;
-                return db.collection('trades')
-                    .where('userId', '==', user.uid)
-                    .orderBy('id', 'desc')
-                    .onSnapshot((snapshot) => {
-                        setTrades(snapshot.docs.map(doc => ({ docId: doc.id, ...doc.data() })));
-                    }, (err) => console.error(err));
-            }, [user]);
-
-            const handleAuth = async (event) => {
-                event.preventDefault();
-                setAuthError('');
-                try {
-                    if (isRegistering) {
-                        await auth.createUserWithEmailAndPassword(email, password);
-                    } else {
-                        await auth.signInWithEmailAndPassword(email, password);
-                    }
-                    ejecutarVibracion(40);
-                } catch (error) {
-                    setAuthError(error.message);
-                    ejecutarVibracion([60, 50, 60]);
+            try {
+                if (isRegistering) {
+                    await auth.createUserWithEmailAndPassword(email, password);
+                } else {
+                    await auth.signInWithEmailAndPassword(email, password);
                 }
-            };
+                ejecutarVibracion(40);
+            } catch (error) {
+                authError.innerText = error.message;
+                authError.classList.remove('hidden');
+                ejecutarVibracion([60, 50, 60]);
+            }
+        });
 
-            const agregarTrade = async (event) => {
-                event.preventDefault();
-                if (!activo || !resultado || !user) return;
-                const monto = Math.abs(parseFloat(resultado));
-                if (isNaN(monto)) return;
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            ejecutarVibracion(30);
+            auth.signOut();
+        });
 
-                const nuevoTrade = {
-                    id: Date.now(),
-                    userId: user.uid,
-                    activo: activo.toUpperCase(),
-                    resultado: estado === 'WIN' ? monto : -monto,
-                    estado, emocion, dia: parseInt(diaSeleccionado), mes: mesVista, año: añoVista
-                };
+        // CONEXIÓN EN TIEMPO REAL CON FIRESTORE
+        let unsubscribeFirestore = null;
+        function conectarFirestore() {
+            if (unsubscribeFirestore) unsubscribeFirestore();
 
-                try {
-                    await db.collection('trades').add(nuevoTrade);
-                    if (estado === 'WIN') { dispararConfeti(); ejecutarVibracion([50, 60, 50]); }
-                    else { ejecutarVibracion(90); }
-                    setActivo(''); setResultado(''); setEmocion('CALMO');
-                } catch (e) { console.error(e); }
-            };
+            unsubscribeFirestore = db.collection('trades')
+                .where('userId', '==', usuarioActual.uid)
+                .orderBy('id', 'desc')
+                .onSnapshot((snapshot) => {
+                    trades = snapshot.docs.map(doc => ({ docId: doc.id, ...doc.data() }));
+                    renderizarTodo();
+                }, (err) => console.error(err));
+        }
 
-            const eliminarTrade = async (docId) => {
-                try { await db.collection('trades').doc(docId).delete(); ejecutarVibracion(60); }
-                catch (e) { console.error(e); }
-            };
+        // CONTROLADORES DE MESES
+        document.getElementById('prev-month-btn').addEventListener('click', () => {
+            ejecutarVibracion(15);
+            if (mesVista === 0) { mesVista = 11; añoVista--; } else { mesVista--; }
+            renderizarTodo();
+        });
 
-            const nombreMeses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-            const diasSemana = ["DOM", "LUN", "MAR", "MIÉ", "JUE", "VIE", "SÁB"];
-            const primerDiaIndex = new Date(añoVista, mesVista, 1).getDay();
-            const totalDiasMes = new Date(añoVista, mesVista + 1, 0).getDate();
-            const tradesDelMesActual = trades.filter(t => t.mes === mesVista && t.año === añoVista);
+        document.getElementById('next-month-btn').addEventListener('click', () => {
+            ejecutarVibracion(15);
+            if (mesVista === 11) { mesVista = 0; añoVista++; } else { mesVista++; }
+            renderizarTodo();
+        });
+
+        // MANEJO DE FORMULARIO DE TRADES
+        const emoButtons = document.querySelectorAll('.emo-btn');
+        emoButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                ejecutarVibracion(15);
+                emoButtons.forEach(b => {
+                    b.classList.remove('border-gold', 'text-white');
+                    b.classList.add('border-transparent', 'text-gray-400', 'bg-bgInput/40');
+                });
+                btn.classList.add('border-gold', 'text-white');
+                btn.classList.remove('border-transparent', 'text-gray-400', 'bg-bgInput/40');
+                emocionSeleccionada = btn.getAttribute('data-emo');
+            });
+        });
+
+        const winBtn = document.getElementById('status-win-btn');
+        const lossBtn = document.getElementById('status-loss-btn');
+
+        winBtn.addEventListener('click', () => {
+            ejecutarVibracion(20);
+            estadoSeleccionado = 'WIN';
+            winBtn.className = "py-2 rounded-xl text-xs font-bold bg-cryptoGreen text-black";
+            lossBtn.className = "py-2 rounded-xl text-xs font-bold bg-bgInput text-gray-400";
+        });
+
+        lossBtn.addEventListener('click', () => {
+            ejecutarVibracion(20);
+            estadoSeleccionado = 'LOSS';
+            lossBtn.className = "py-2 rounded-xl text-xs font-bold bg-cryptoRed text-white";
+            winBtn.className = "py-2 rounded-xl text-xs font-bold bg-bgInput text-gray-400";
+        });
+
+        tradeForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const activoInput = document.getElementById('trade-activo');
+            const resultadoInput = document.getElementById('trade-resultado');
             
-            const obtenerDataDia = (nroDia) => {
-                const tradesDelDia = tradesDelMesActual.filter(t => t.dia === nroDia);
-                if (tradesDelDia.length === 0) return null;
-                return { pnl: tradesDelDia.reduce((acc, t) => acc + t.resultado, 0) };
+            const activo = activoInput.value.toUpperCase();
+            const monto = Math.abs(parseFloat(resultadoInput.value));
+            if (!activo || isNaN(monto) || !usuarioActual) return;
+
+            const nuevoTrade = {
+                id: Date.now(),
+                userId: usuarioActual.uid,
+                activo: activo,
+                resultado: estadoSeleccionado === 'WIN' ? monto : -monto,
+                estado: estadoSeleccionado,
+                emocion: emocionSeleccionada,
+                dia: parseInt(diaSeleccionado),
+                mes: mesVista,
+                año: añoVista
             };
 
-            const totalPnlMes = tradesDelMesActual.reduce((acc, t) => acc + t.resultado, 0);
+            try {
+                await db.collection('trades').add(nuevoTrade);
+                if (estadoSeleccionado === 'WIN') {
+                    dispararConfeti();
+                    ejecutarVibracion([50, 60, 50]);
+                } else {
+                    ejecutarVibracion(90);
+                }
+                activoInput.value = '';
+                resultadoInput.value = '';
+            } catch (e) { console.error(e); }
+        });
+
+        async function eliminarTrade(docId) {
+            try {
+                await db.collection('trades').doc(docId).delete();
+                ejecutarVibracion(60);
+            } catch (e) { console.error(e); }
+        }
+
+        // SISTEMA DE RENDERIZADO COMPLETO (VANILLA)
+        function renderizarTodo() {
+            monthTitle.innerHTML = `${NOMBRE_MESES[mesVista]} <span class="text-gray-500 font-mono text-xs">${añoVista}</span>`;
+
+            // Filtrar operaciones
+            const tradesDelMes = trades.filter(t => t.mes === mesVista && t.año === añoVista);
+            const totalPnlMes = tradesDelMes.reduce((acc, t) => acc + t.resultado, 0);
             const totalPnlAcumulado = trades.reduce((acc, t) => acc + t.resultado, 0);
 
-            const emocionDominante = (() => {
-                if (tradesDelMesActual.length === 0) return { key: 'VACIO', texto: 'Sin datos' };
-                const conteo = {};
-                tradesDelMesActual.forEach(t => { const em = t.emocion || 'CALMO'; conteo[em] = (conteo[em] || 0) + 1; });
-                let maxEmo = 'CALMO', maxC = 0;
-                for (const k in conteo) { if (conteo[k] > maxC) { maxC = conteo[k]; maxEmo = k; } }
-                const mapa = { 'CALMO': 'Calmo / Focalizado', 'ANSIOSO': 'Ansioso / Apurado', 'ENOJADO': 'Enojado (Furia)', 'MIEDO': 'Miedo al mercado' };
-                return { key: maxEmo, texto: mapa[maxEmo] || 'Desconocido' };
-            })();
-
-            useEffect(() => {
-                if (vista === 'metricas' && chartRef.current && trades.length > 0) {
-                    if (chartInstance.current) chartInstance.current.destroy();
-                    const crono = [...trades].sort((a, b) => a.id - b.id);
-                    let bal = 0; const puntos = [0], labels = ["Inicio"];
-                    crono.forEach(t => { bal += t.resultado; puntos.push(bal); labels.push(`${t.dia}/${t.mes + 1}`); });
-                    chartInstance.current = new Chart(chartRef.current.getContext('2d'), {
-                        type: 'line',
-                        data: { labels, datasets: [{ data: puntos, borderColor: bal >= 0 ? '#0ecb81' : '#f6465d', backgroundColor: 'rgba(0,0,0,0)', borderWidth: 2, pointBackgroundColor: '#f0b90b', pointRadius: 2, tension: 0.1 }] },
-                        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
-                    });
-                }
-                return () => { if (chartInstance.current) chartInstance.current.destroy(); };
-            }, [vista, trades]);
-
-            if (!user) {
-                return e('div', { className: 'h-screen max-w-md mx-auto bg-bgMain flex flex-col justify-center p-6' },
-                    e('div', { className: 'bg-bgCard p-6 rounded-2xl border border-gray-800 shadow-2xl flex flex-col gap-4' },
-                        e('div', { className: 'text-center mb-2' },
-                            e('h2', { className: 'text-xl font-black text-white uppercase tracking-wider' }, 'Trading Journal'),
-                            e('p', { className: 'text-xs text-gray-400 mt-1' }, 'Sincronización en la Nube')
-                        ),
-                        e('form', { onSubmit: handleAuth, className: 'flex flex-col gap-3' },
-                            e('input', { type: 'email', placeholder: 'Correo electrónico', value: email, onChange: r => setEmail(r.target.value), required: true, className: 'bg-bgInput text-white px-4 py-3 rounded-xl text-xs font-bold outline-none border border-transparent focus:border-gold' }),
-                            e('input', { type: 'password', placeholder: 'Contraseña', value: password, onChange: r => setPassword(r.target.value), required: true, className: 'bg-bgInput text-white px-4 py-3 rounded-xl text-xs font-bold outline-none border border-transparent focus:border-gold' }),
-                            authError && e('p', { className: 'text-[10px] text-cryptoRed font-bold text-center' }, authError),
-                            e('button', { type: 'submit', className: 'w-full bg-gold text-black font-black py-3 rounded-xl text-xs uppercase tracking-widest mt-1' }, isRegistering ? 'Crear Cuenta Cloud' : 'Ingresar')
-                        ),
-                        e('button', { type: 'button', onClick: () => { ejecutarVibracion(20); setIsRegistering(!isRegistering); }, className: 'text-[11px] text-gray-500 font-bold hover:text-white underline text-center' }, isRegistering ? '¿Ya tenés cuenta? Iniciá sesión' : '¿No tenés cuenta? Registrate gratis')
-                    )
-                );
+            // Actualizar insignias de dinero
+            monthPnlBadge.innerText = `$${totalPnlMes.toFixed(2)}`;
+            if (totalPnlMes >= 0) {
+                monthPnlBadge.className = "text-xs font-bold font-mono px-2 py-1 rounded text-cryptoGreen bg-cryptoGreen/10";
+            } else {
+                monthPnlBadge.className = "text-xs font-bold font-mono px-2 py-1 rounded text-cryptoRed bg-cryptoRed/10";
             }
 
-            return e('div', { className: 'h-screen max-w-md mx-auto bg-bgMain flex flex-col overflow-hidden relative' },
-                e('header', { className: 'bg-bgMain px-4 py-4 border-b border-gray-800 flex justify-between items-center z-50 shrink-0' },
-                    e('div', { className: 'flex items-center gap-2' },
-                        e('div', { className: 'w-2.5 h-2.5 bg-cryptoGreen rounded-full' }),
-                        e('h1', { className: 'text-base font-black tracking-wider uppercase' }, 'Trading Journal')
-                    ),
-                    e('div', { className: 'flex items-center gap-2' },
-                        e('a', { href: 'https://www.facebook.com/share/g/1BBVwh32q1/', target: '_blank', rel: 'noopener noreferrer', onClick: () => ejecutarVibracion(20), className: 'text-[9px] text-white font-black bg-blue-600/20 border border-blue-500/30 px-2 py-1 rounded-lg hover:bg-blue-600/40 transition' }, 'COMUNIDAD 👥'),
-                        e('button', { onClick: () => { ejecutarVibracion(30); auth.signOut(); }, className: 'text-[9px] text-cryptoRed font-bold bg-cryptoRed/10 border border-cryptoRed/20 px-2 py-1 rounded-lg' }, 'CERRAR SESIÓN')
-                    )
-                ),
-                e('main', { className: 'p-4 flex flex-col gap-5 flex-1 overflow-y-auto pb-28' },
-                    e('div', { className: 'bg-bgCard rounded-2xl border border-gray-800 p-4 shadow-xl shrink-0' },
-                        e('div', { className: 'flex justify-between items-center mb-4' },
-                            e('div', { className: 'flex items-center gap-2' },
-                                e('button', { type: 'button', onClick: () => { ejecutarVibracion(15); setMesVista(mesVista === 0 ? 11 : mesVista - 1); }, className: 'w-8 h-8 rounded-lg bg-bgInput flex items-center justify-center font-bold text-gray-400' }, '<'),
-                                e('h2', { className: 'text-sm font-black text-white uppercase tracking-wide min-w-[110px] text-center' }, `${nombreMeses[mesVista]} `, e('span', { className: 'text-gray-500 font-mono text-xs' }, añoVista)),
-                                e('button', { type: 'button', onClick: () => { ejecutarVibracion(15); setMesVista(mesVista === 11 ? 0 : mesVista + 1); }, className: 'w-8 h-8 rounded-lg bg-bgInput flex items-center justify-center font-bold text-gray-400' }, '>')
-                            ),
-                            e('span', { className: `text-xs font-bold font-mono px-2 py-1 rounded ${totalPnlMes >= 0 ? 'text-cryptoGreen bg-cryptoGreen/10' : 'text-cryptoRed bg-cryptoRed/10'}` }, `$${safeFixed(totalPnlMes)}`)
-                        ),
-                        vista === 'calendario' ? e('div', null,
-                            e('div', { className: 'grid grid-cols-7 gap-1 text-center mb-1' }, diasSemana.map(d => e('span', { key: d, className: 'text-[9px] text-gray-500 font-bold' }, d))),
-                            e('div', { className: 'grid grid-cols-7 gap-1.5' },
-                                Array(primerDiaIndex).fill(null).map((_, i) => e('div', { key: 'empty-' + i })),
-                                Array(totalDiasMes).fill(null).map((_, index) => {
-                                    const nroDia = index + 1; const dataDia = obtenerDataDia(nroDia);
-                                    return e('div', { key: nroDia, onClick: () => { ejecutarVibracion(25); setDiaSeleccionado(nroDia); }, className: `aspect-square rounded-lg flex flex-col justify-between p-1 text-[10px] cursor-pointer ${dataDia ? (dataDia.pnl >= 0 ? 'bg-cryptoGreen text-black font-bold' : 'bg-cryptoRed text-white font-bold') : 'bg-bgInput/40 text-gray-400'} ${diaSeleccionado === nroDia ? 'ring-2 ring-gold' : ''}` },
-                                        e('span', null, nroDia),
-                                        dataDia && e('span', { className: 'text-[7px] truncate' }, `${dataDia.pnl >= 0 ? '+' : ''}${parseFloat(dataDia.pnl).toFixed(1)}`)
-                                    );
-                                })
-                            )
-                        ) : e('div', { className: 'w-full relative h-[180px]' }, e('canvas', { ref: chartRef }))
-                    ),
-                    vista === 'metricas' && e('div', { className: 'flex flex-col gap-2 shrink-0' },
-                        e('div', { className: 'grid grid-cols-2 gap-2' },
-                            e('div', { className: 'bg-bgCard p-3 rounded-xl border border-gray-800' }, e('span', { className: 'text-[9px] text-gray-500 font-bold block' }, 'PnL MES'), e('span', { className: 'text-sm font-black text-white' }, `$${safeFixed(totalPnlMes)}`)),
-                            e('div', { className: 'bg-bgCard p-3 rounded-xl border border-gold/20' }, e('span', { className: 'text-[9px] text-gold font-bold block' }, 'ACUMULADO'), e('span', { className: 'text-sm font-black text-white' }, `$${safeFixed(totalPnlAcumulado)}`))
-                        ),
-                        e('div', { className: 'bg-bgCard p-3 rounded-xl border border-gray-800 flex items-center justify-between' },
-                            e('div', null, e('span', { className: 'text-[9px] text-gray-400 font-bold block uppercase tracking-wider' }, 'Métrica Psicotrading'), e('span', { className: 'text-xs font-black text-white block mt-0.5' }, 'Emoción Dominante'), e('span', { className: 'text-[10px] text-gray-500 font-medium' }, emocionDominante.texto)),
-                            e('div', { className: 'w-12 h-12 rounded-xl flex items-center justify-center text-2xl bg-bgInput' }, emocionDominante.key !== 'VACIO' ? TEXTO_EMOJIS[emocionDominante.key] : '❔')
-                        )
-                    ),
-                    vista === 'calendario' && e('form', { onSubmit: agregarTrade, className: 'bg-bgCard p-4 rounded-2xl border border-gray-800 flex flex-col gap-3 shrink-0' },
-                        e('div', { className: 'grid grid-cols-2 gap-2' },
-                            e('input', { type: 'text', placeholder: 'Activo (BTC)', value: activo, onChange: r => setActivo(r.target.value), className: 'bg-bgInput text-white px-3 py-2.5 rounded-xl text-xs font-bold outline-none' }),
-                            e('input', { type: 'number', step: 'any', placeholder: 'Resultado USD', value: resultado, onChange: r => setResultado(r.target.value), className: 'bg-bgInput text-white px-3 py-2.5 rounded-xl text-xs font-bold outline-none' })
-                        ),
-                        e('div', { className: 'flex flex-col gap-1.5' },
-                            e('span', { className: 'text-[10px] text-gray-500 font-bold uppercase px-1' }, 'Psicotrading (Estado Emocional)'),
-                            e('div', { className: 'grid grid-cols-4 gap-1.5' },
-                                [ { id: 'CALMO', label: 'Calmo' }, { id: 'ANSIOSO', label: 'Ansioso' }, { id: 'ENOJADO', label: 'Enojado' }, { id: 'MIEDO', label: 'Miedo' } ].map(item => (
-                                    e('button', { key: item.id, type: 'button', onClick: () => { ejecutarVibracion(15); setEmocion(item.id); }, className: `py-2 rounded-xl flex flex-col items-center justify-center border transition ${emocion === item.id ? 'bg-bgInput border-gold text-white' : 'bg-bgInput/40 border-transparent text-gray-400'}` },
-                                        e('span', { className: 'text-2xl mb-1' }, TEXTO_EMOJIS[item.id]), e('span', { className: 'text-[8px] font-bold uppercase tracking-wide' }, item.label)
-                                    )
-                                )))
-                        ),
-                        e('div', { className: 'grid grid-cols-2 gap-2' },
-                            e('button', { type: 'button', onClick: () => { ejecutarVibracion(20); setEstado('WIN'); }, className: `py-2 rounded-xl text-xs font-bold transition ${estado === 'WIN' ? 'bg-cryptoGreen text-black' : 'bg-bgInput text-gray-400'}` }, 'WIN'),
-                            e('button', { type: 'button', onClick: () => { ejecutarVibracion(20); setEstado('LOSS'); }, className: `py-2 rounded-xl text-xs font-bold transition ${estado === 'LOSS' ? 'bg-cryptoRed text-white' : 'bg-bgInput text-gray-400'}` }, 'LOSS')
-                        ),
-                        e('button', { type: 'submit', className: 'bg-gold text-black font-black py-3 rounded-xl text-xs uppercase tracking-wider' }, 'Guardar en la Nube')
-                    ),
-                    e('div', { className: 'shrink-0' },
-                        e('h3', { className: 'text-xs font-black text-gray-500 uppercase tracking-wider mb-2 px-1' }, 'Operaciones del Mes'),
-                        e('div', { className: 'flex flex-col gap-2' }, tradesDelMesActual.map(t => (
-                            e('div', { key: t.id, className: 'bg-bgCard px-4 py-3 rounded-xl border border-gray-800 flex justify-between items-center' },
-                                e('div', { className: 'flex items-center gap-2' },
-                                    e('span', { className: 'bg-bgInput/60 p-1 rounded-lg flex items-center justify-center w-8 h-8 text-lg' }, TEXTO_EMOJIS[t.emocion || 'CALMO'] || TEXTO_EMOJIS['CALMO']),
-                                    e('span', { className: 'text-xs font-black text-white' }, `${t.activo} (Día ${t.dia})`)
-                                ),
-                                e('div', { className: 'flex items-center gap-3' },
-                                    e('span', { className: `font-bold text-xs ${t.resultado >= 0 ? 'text-cryptoGreen' : 'text-cryptoRed'}` }, `$${safeFixed(t.resultado)}`),
-                                    e('button', { type: 'button', onClick: () => eliminarTrade(t.docId), className: 'text-gray-500 hover:text-cryptoRed font-bold text-lg px-1' }, '×')
-                                )
-                            )
-                        ))))
-                ),
-                e('nav', { className: 'absolute bottom-0 left-0 right-0 max-w-md mx-auto bg-bgCard border-t border-gray-800 px-6 py-4 flex justify-between items-center z-50 shadow-[0_-8px_30px_rgba(0,0,0,0.7)]' },
-                    e('button', { type: 'button', onClick: () => { ejecutarVibracion(20
+            // Renderizar Calendario
+            calendarGrid.innerHTML = '';
+            const primerDiaIndex = new Date(añoVista, mesVista, 1).getDay();
+            const totalDiasMes = new Date(añoVista, mesVista + 1, 0).getDate();
+
+            for (let i = 0; i < primerDiaIndex; i++) {
+                calendarGrid.appendChild(document.createElement('div'));
+            }
+
+            for (let d = 1; d <= totalDiasMes; d++) {
+                const tradesDelDia = tradesDelMes.filter(t => t.dia === d);
+                let pnlDia = 0;
+                let jugo = tradesDelDia.length > 0;
+                if (jugo) {
+                    pnlDia = tradesDelDia.reduce((acc, t) => acc + t.resultado, 0);
+                }
+
+                const celda = document.createElement('div');
+                celda.className = `aspect-square rounded-lg flex flex-col justify-between p-1 text-[10px] cursor-pointer ${jugo ? (pnlDia >= 0 ? 'bg-cryptoGreen text-black font-bold' : 'bg-cryptoRed text-white font-bold') : 'bg-bgInput/40 text-gray-400'} ${diaSeleccionado === d ? 'ring-2 ring-gold' : ''}`;
+                
+                celda.innerHTML = `<span>${d}</span>`;
+                if (jugo) {
+                    celda.innerHTML += `<span class="text-[7px] truncate">${pnlDia >= 0 ? '+' : ''}${pnlDia.toFixed(1)}</span>`;
+                }
+
+                celda.addEventListener('click', () => {
+                    ejecutarVibracion(25);
+                    diaSeleccionado = d;
+                    renderizarTodo();
+                });
+                calendarGrid.appendChild(celda);
+            }
+
+            // Renderizar Lista de Operaciones inferiores del mes
+            tradesList.innerHTML = '';
+            tradesDelMes.forEach(t => {
+                const item = document.createElement('div');
+                item.className = "bg-bgCard px-4 py-3 rounded-xl border border-gray-800 flex justify-between items-center";
+                item.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <span class="bg-bgInput/60 p-1 rounded-lg flex items-center justify-center w-8 h-8 text-lg">${TEXTO_EMOJIS[t.emocion || 'CALMO']}</span>
+                        <span class="text-xs font-black text-white">${t.activo} (Día ${t.dia})</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="font-bold text-xs ${t.resultado >= 0 ? 'text-cryptoGreen' : 'text-cryptoRed'}">$${t.resultado.toFixed(2)}</span>
+                        <button class="delete-trade-btn text-gray-500 hover:text-cryptoRed font-bold text-lg px-1" data-id="${t.docId}">&times;</button>
+                    </div>
+                `;
+                item.querySelector('.delete-trade-btn').addEventListener('click', () => eliminarTrade(t.docId));
+                tradesList.appendChild(item);
+            });
+
+            // Actualizar Métricas si la vista está activa
+            widgetPnlMes.innerText = `$${totalPnlMes.toFixed(2)}`;
+            widgetPnlAcumulado.innerText = `$${totalPnlAcumulado.toFixed(2)}`;
+
+            // Calcular Emoción Dominante
+            if (tradesDelMes.length === 0) {
+                widgetEmocionTexto.innerText = 'Sin datos';
+                widgetEmocionEmoji.innerText = '❔';
+            } else {
+                const conteo = {};
+                tradesDelMes.forEach(t => { const em = t.emocion || 'CALMO'; conteo[em] = (conteo[em] || 0) + 1; });
+                let maxEmo = 'CALMO', maxC = 0;
+                for (const k in conteo) { if (conteo[k] > maxC) { maxC = conteo[k]; maxEmo = k; } }
+                widgetEmocionTexto.innerText = MAPA_TEXTOS[maxEmo];
+                widgetEmocionEmoji.innerText = TEXTO_EMOJIS[maxEmo];
+            }
+
+            // Actualizar Gráfico Lineal
+            if (vistaActual === 'metricas') {
+                renderizarGrafico();
+            }
+        }
+
+        function renderizarGrafico() {
+            const canvasCtx = document.getElementById('metrics-chart');
+            if (!canvasCtx) return;
+
+            if (chartInstance) chartInstance.destroy();
+
+            const crono = [...trades].sort((a, b) => a.id - b.id);
+            let bal = 0; 
+            const puntos = [0]; 
+            const labels = ["Inicio"];
+            
+            crono.forEach(t => { 
+                bal += t.resultado; 
+                puntos.push(bal); 
+                labels.push(`${t.dia}/${t.mes + 1}`); 
+            });
+
+            chartInstance = new Chart(canvasCtx.getContext('2d'), {
+                type: 'line',
+                data: { 
+                    labels, 
+                    datasets: [{ 
+                        data: puntos, 
+                        borderColor: bal >= 0 ? '#0ecb81' : '#f6465d', 
+                        backgroundColor: 'rgba(0,0,0,0)', 
+                        borderWidth: 2, 
+                        pointBackgroundColor: '#f0b90b', 
+                        pointRadius: 2, 
+                        tension: 0.1 
+                    }] 
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+        }
+
+        // NAVEGACIÓN ENTRE SECCIONES
+        const navCalendar = document.getElementById('nav-calendar');
+        const navMetrics = document.getElementById('nav-metrics');
+        const navLegal = document.getElementById('nav-legal');
+        const legalModal = document.getElementById('legal-modal');
+
+        navCalendar.addEventListener('click', () => {
+            ejecutarVibracion(20);
+            vistaActual = 'calendario';
+            navCalendar.className = "flex-1 flex flex-col items-center gap-1 py-1 text-gold scale-105";
+            navMetrics.className = "flex-1 flex flex-col items-center gap-1 py-1 text-gray-300 hover:text-white";
+            
+            calendarView.classList.remove('hidden-view');
+            tradeForm.classList.remove('hidden-view');
+            chartView.classList.add('hidden-view');
+            metricsWidgets.classList.add('hidden-view');
+        });
+
+        navMetrics.addEventListener('click', () => {
+            ejecutarVibracion(20);
+            vistaActual = 'metricas';
+            navMetrics.className = "flex-1 flex flex-col items-center gap-1 py-1 text-gold scale-105";
+            navCalendar.className = "flex-1 flex flex-col items-center gap-1 py-1 text-gray-300 hover:text-white";
+            
+            calendarView.classList.add('hidden-view');
+            tradeForm.classList.add('hidden-view');
+            chartView.classList.remove('hidden-view');
+            metricsWidgets.classList.remove('hidden-view');
+            renderizarGrafico();
+        });
+
+        navLegal.addEventListener('click', () => { ejecutarVibracion(20); legalModal.classList.remove('hidden-view'); });
+        document.getElementById('close-legal-btn').addEventListener('click', () => { ejecutarVibracion(15); legalModal.classList.add('hidden-view'); });
+        document.getElementById('accept-legal-btn').addEventListener('click', () => { ejecutarVibracion(20); legalModal.classList.add('hidden-view'); });
+    </script>
+</body>
+</html>
