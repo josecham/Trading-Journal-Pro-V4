@@ -83,21 +83,11 @@
             measurementId: "G-48ZJ22DD37"
         };
 
-        let auth = null;
-        let db = null;
-        let errorInicializacion = "";
-
-        // Blindaje absoluto para evitar pantallas en negro por bloqueos de red/CORS locales
-        try {
-            if (!firebase.apps.length) {
-                firebase.initializeApp(firebaseConfig);
-            }
-            auth = firebase.auth();
-            db = firebase.firestore();
-        } catch (error) {
-            console.error("Error crítico al cargar Firebase: ", error);
-            errorInicializacion = error.message;
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
         }
+        const auth = firebase.auth();
+        const db = firebase.firestore();
 
         const URL_CARITAS = {
             'CALMO': 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f929/512.webp',
@@ -150,27 +140,6 @@
             
             const chartRef = useRef(null);
             const chartInstance = useRef(null);
-
-            // Si Firebase falló al iniciar, renderizar un panel de alerta controlado en lugar de dejar la pantalla oscura
-            if (errorInicializacion || !auth || !db) {
-                return (
-                    <div className="h-screen max-w-md mx-auto bg-bgMain flex flex-col justify-center p-6 text-center">
-                        <div className="bg-bgCard p-6 rounded-2xl border border-cryptoRed/40 shadow-2xl">
-                            <span className="text-3xl block mb-2">⚠️</span>
-                            <h2 className="text-sm font-black text-white uppercase tracking-wider">Error de Entorno Local</h2>
-                            <p className="text-[11px] text-gray-400 mt-2 leading-relaxed">
-                                El navegador bloqueó la conexión a la base de datos en la nube porque estás abriendo el archivo HTML directamente (URL file://).
-                            </p>
-                            <div className="bg-bgInput/50 p-2 rounded-xl font-mono text-[9px] text-cryptoRed my-3 overflow-x-auto">
-                                {errorInicializacion || "Firebase SDK no detectado"}
-                            </div>
-                            <p className="text-[10px] text-gold font-bold">
-                                Solución: Sube el archivo a tu hosting o ábrelo usando un servidor local (como Live Server en VSCode).
-                            </p>
-                        </div>
-                    </div>
-                );
-            }
 
             useEffect(() => {
                 const unsubscribe = auth.onAuthStateChanged((currentUser) => {
@@ -399,7 +368,7 @@
                             </div>
 
                             {vista === 'calendario' ? (
-                                <React.Fragment>
+                                <div>
                                     <div className="grid grid-cols-7 gap-1 text-center mb-1">
                                         {diasSemana.map(d => <span key={d} className="text-[9px] text-gray-500 font-bold">{d}</span>)}
                                     </div>
@@ -416,7 +385,7 @@
                                             );
                                         })}
                                     </div>
-                                </React.Fragment>
+                                </div>
                             ) : (
                                 <div className="w-full relative h-[180px]"><canvas ref={chartRef}></canvas></div>
                             )}
