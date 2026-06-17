@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Trading Journal Cloud V6</title>
+    <title>Trading Journal V6</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -62,17 +62,18 @@
 <body class="text-gray-200 font-sans antialiased">
     <div id="root"></div>
 
+    <!-- Librerías Clásicas -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
+    <!-- Firebase SDK Legacy Universal -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
-    <script>
-        // Inicialización nativa e inmediata de React sin usar Babel (Inmune a bloqueos de Vercel)
+    <script type="text/babel">
         const { useState, useEffect, useRef } = React;
-        const e = React.createElement;
 
         const firebaseConfig = {
             apiKey: "AIzaSyAts93tv8WY702grlHPGnh6ID1QeR_3XQc",
@@ -90,11 +91,12 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        const URL_CARITAS = {
-            'CALMO': 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f929/512.webp',
-            'ANSIOSO': 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f630/512.webp',
-            'ENOJADO': 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f621/512.webp',
-            'MIEDO': 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f628/512.webp'
+        // Emojis de texto nativos hipercompatibles
+        const TEXTO_EMOJIS = {
+            'CALMO': '😎',
+            'ANSIOSO': '😰',
+            'ENOJADO': '😡',
+            'MIEDO': '😨'
         };
 
         const ejecutarVibracion = (patron) => {
@@ -306,181 +308,217 @@
                 return () => { if (chartInstance.current) chartInstance.current.destroy(); };
             }, [vista, trades]);
 
-            // Sistema de renderizado ultra seguro sin HTML plano dentro de JS
             if (!user) {
-                return e('div', { className: 'h-screen max-w-md mx-auto bg-bgMain flex flex-col justify-center p-6' },
-                    e('div', { className: 'bg-bgCard p-6 rounded-2xl border border-gray-800 shadow-2xl flex flex-col gap-4' },
-                        e('div', { className: 'text-center mb-2' },
-                            e('h2', { className: 'text-xl font-black text-white uppercase tracking-wider' }, 'Trading Journal'),
-                            e('p', { className: 'text-xs text-gray-400 mt-1' }, 'Sincronización en la Nube')
-                        ),
-                        e('form', { onSubmit: handleAuth, className: 'flex flex-col gap-3' },
-                            e('input', { type: 'email', placeholder: 'Correo electrónico', value: email, onChange: (e) => setEmail(e.target.value), required: true, className: 'bg-bgInput text-white px-4 py-3 rounded-xl text-xs font-bold outline-none border border-transparent focus:border-gold' }),
-                            e('input', { type: 'password', placeholder: 'Contraseña', value: password, onChange: (e) => setPassword(e.target.value), required: true, className: 'bg-bgInput text-white px-4 py-3 rounded-xl text-xs font-bold outline-none border border-transparent focus:border-gold' }),
-                            authError && e('p', { className: 'text-[10px] text-cryptoRed font-bold text-center' }, authError),
-                            e('button', { type: 'submit', className: 'w-full bg-gold text-black font-black py-3 rounded-xl text-xs uppercase tracking-widest mt-1' }, isRegistering ? 'Crear Cuenta Cloud' : 'Ingresar')
-                        ),
-                        e('button', { onClick: () => { ejecutarVibracion(20); setIsRegistering(!isRegistering); }, className: 'text-[11px] text-gray-500 font-bold hover:text-white underline text-center' }, isRegistering ? '¿Ya tenés cuenta? Iniciá sesión' : '¿No tenés cuenta? Registrate gratis')
-                    )
+                return (
+                    <div className="h-screen max-w-md mx-auto bg-bgMain flex flex-col justify-center p-6">
+                        <div className="bg-bgCard p-6 rounded-2xl border border-gray-800 shadow-2xl flex flex-col gap-4">
+                            <div className="text-center mb-2">
+                                <h2 className="text-xl font-black text-white uppercase tracking-wider">Trading Journal</h2>
+                                <p className="text-xs text-gray-400 mt-1">Sincronización en la Nube</p>
+                            </div>
+                            <form onSubmit={handleAuth} className="flex flex-col gap-3">
+                                <input 
+                                    type="email" placeholder="Correo electrónico" value={email} onChange={(e) => setEmail(e.target.value)} required
+                                    className="bg-bgInput text-white px-4 py-3 rounded-xl text-xs font-bold outline-none border border-transparent focus:border-gold"
+                                />
+                                <input 
+                                    type="password" placeholder="Contraseña" value={password} onChange={(e) => setPassword(e.target.value)} required
+                                    className="bg-bgInput text-white px-4 py-3 rounded-xl text-xs font-bold outline-none border border-transparent focus:border-gold"
+                                />
+                                {authError && <p className="text-[10px] text-cryptoRed font-bold text-center">{authError}</p>}
+                                <button type="submit" className="w-full bg-gold text-black font-black py-3 rounded-xl text-xs uppercase tracking-widest mt-1">
+                                    {isRegistering ? 'Crear Cuenta Cloud' : 'Ingresar'}
+                                </button>
+                            </form>
+                            <button onClick={() => { ejecutarVibracion(20); setIsRegistering(!isRegistering); }} className="text-[11px] text-gray-500 font-bold hover:text-white underline text-center">
+                                {isRegistering ? '¿Ya tenés cuenta? Iniciá sesión' : '¿No tenés cuenta? Registrate gratis'}
+                            </button>
+                        </div>
+                    </div>
                 );
             }
 
-            return e('div', { className: 'h-screen max-w-md mx-auto bg-bgMain flex flex-col overflow-hidden relative' },
-                e('header', { className: 'bg-bgMain px-4 py-4 border-b border-gray-800 flex justify-between items-center z-50 shrink-0' },
-                    e('div', { className: 'flex items-center gap-2' },
-                        e('div', { className: 'w-2.5 h-2.5 bg-cryptoGreen rounded-full' }),
-                        e('h1', { className: 'text-base font-black tracking-wider uppercase' }, 'Trading Journal')
-                    ),
-                    e('div', { className: 'flex items-center gap-2' },
-                        e('a', { href: 'https://www.facebook.com/share/g/1BBVwh32q1/', target: '_blank', rel: 'noopener noreferrer', onClick: () => ejecutarVibracion(20), className: 'text-[9px] text-white font-black bg-blue-600/20 border border-blue-500/30 px-2 py-1 rounded-lg hover:bg-blue-600/40 transition' }, 'COMUNIDAD 👥'),
-                        e('button', { onClick: handleLogout, className: 'text-[9px] text-cryptoRed font-bold bg-cryptoRed/10 border border-cryptoRed/20 px-2 py-1 rounded-lg' }, 'CERRAR SESIÓN')
-                    )
-                ),
-                e('main', { className: 'p-4 flex flex-col gap-5 flex-1 overflow-y-auto pb-28' },
-                    e('div', { className: 'bg-bgCard rounded-2xl border border-gray-800 p-4 shadow-xl shrink-0' },
-                        e('div', { className: 'flex justify-between items-center mb-4' },
-                            e('div', { className: 'flex items-center gap-2' },
-                                e('button', { onClick: () => { ejecutarVibracion(15); setMesVista(mesVista === 0 ? 11 : mesVista - 1); }, className: 'w-8 h-8 rounded-lg bg-bgInput flex items-center justify-center font-bold text-gray-400' }, '<'),
-                                e('h2', { className: 'text-sm font-black text-white uppercase tracking-wide min-w-[110px] text-center' }, `${nombreMeses[mesVista]} `, e('span', { className: 'text-gray-500 font-mono text-xs' }, añoVista)),
-                                e('button', { onClick: () => { ejecutarVibracion(15); setMesVista(mesVista === 11 ? 0 : mesVista + 1); }, className: 'w-8 h-8 rounded-lg bg-bgInput flex items-center justify-center font-bold text-gray-400' }, '>')
-                            ),
-                            e('span', { className: `text-xs font-bold font-mono px-2 py-1 rounded ${totalPnlMes >= 0 ? 'text-cryptoGreen bg-cryptoGreen/10' : 'text-cryptoRed bg-cryptoRed/10'}` }, `$${totalPnlMes.toLocaleString()}`)
-                        ),
-                        vista === 'calendario' ? e('div', null,
-                            e('div', { className: 'grid grid-cols-7 gap-1 text-center mb-1' },
-                                diasSemana.map(d => e('span', { key: d, className: 'text-[9px] text-gray-500 font-bold' }, d))
-                            ),
-                            e('div', { className: 'grid grid-cols-7 gap-1.5' },
-                                Array(primerDiaIndex).fill(null).map((_, i) => e('div', { key: `empty-${i}` })),
-                                Array(totalDiasMes).fill(null).map((_, index) => {
-                                    const nroDia = index + 1;
-                                    const dataDia = obtenerDataDia(nroDia);
-                                    return e('div', {
-                                        key: nroDia,
-                                        onClick: () => { ejecutarVibracion(25); setDiaSeleccionado(nroDia); },
-                                        className: `aspect-square rounded-lg flex flex-col justify-between p-1 text-[10px] cursor-pointer ${dataDia ? (dataDia.pnl >= 0 ? 'bg-cryptoGreen text-black font-bold' : 'bg-cryptoRed text-white font-bold') : 'bg-bgInput/40 text-gray-400'} ${diaSeleccionado === nroDia ? 'ring-2 ring-gold' : ''}`
-                                    },
-                                        e('span', null, nroDia),
-                                        dataDia && e('span', { className: 'text-[7px] truncate' }, Math.round(dataDia.pnl))
-                                    );
-                                })
-                            )
-                        ) : e('div', { className: 'w-full relative h-[180px]' }, e('canvas', { ref: chartRef }))
-                    ),
-                    vista === 'metricas' && e('div', { className: 'flex flex-col gap-2 shrink-0' },
-                        e('div', { className: 'grid grid-cols-2 gap-2' },
-                            e('div', { className: 'bg-bgCard p-3 rounded-xl border border-gray-800' },
-                                e('span', { className: 'text-[9px] text-gray-500 font-bold block' }, 'PnL MES'),
-                                e('span', { className: 'text-sm font-black text-white' }, `$${totalPnlMes}`)
-                            ),
-                            e('div', { className: 'bg-bgCard p-3 rounded-xl border border-gold/20' },
-                                e('span', { className: 'text-[9px] text-gold font-bold block' }, 'ACUMULADO'),
-                                e('span', { className: 'text-sm font-black text-white' }, `$${totalPnlAcumulado}`)
-                            )
-                        ),
-                        e('div', { className: 'bg-bgCard p-3 rounded-xl border border-gray-800 flex items-center justify-between' },
-                            e('div', null,
-                                e('span', { className: 'text-[9px] text-gray-400 font-bold block uppercase tracking-wider' }, 'Métrica Psicotrading'),
-                                e('span', { className: 'text-xs font-black text-white block mt-0.5' }, 'Emoción Dominante'),
-                                e('span', { className: 'text-[10px] text-gray-500 font-medium' }, emocionDominante.texto)
-                            ),
-                            e('div', { className: 'w-12 h-12 rounded-xl flex items-center justify-center p-2 bg-bgInput' },
-                                emocionDominante.key !== 'VACIO' ? e('img', { src: URL_CARITAS[emocionDominante.key], alt: 'Emoción', className: 'w-full h-full object-contain' }) : '❔'
-                            )
-                        )
-                    ),
-                    vista === 'calendario' && e('form', { onSubmit: agregarTrade, className: 'bg-bgCard p-4 rounded-2xl border border-gray-800 flex flex-col gap-3 shrink-0' },
-                        e('div', { className: 'grid grid-cols-2 gap-2' },
-                            e('input', { type: 'text', placeholder: 'Activo (BTC)', value: activo, onChange: (e) => setActivo(e.target.value), className: 'bg-bgInput text-white px-3 py-2.5 rounded-xl text-xs font-bold outline-none' }),
-                            e('input', { type: 'number', placeholder: 'Resultado USD', value: resultado, onChange: (e) => setResultado(e.target.value), className: 'bg-bgInput text-white px-3 py-2.5 rounded-xl text-xs font-bold outline-none' })
-                        ),
-                        e('div', { className: 'flex flex-col gap-1.5' },
-                            e('span', { className: 'text-[10px] text-gray-500 font-bold uppercase px-1' }, 'Psicotrading (Estado Emocional)'),
-                            e('div', { className: 'grid grid-cols-4 gap-1.5' },
-                                [
-                                    { id: 'CALMO', label: 'Calmo' },
-                                    { id: 'ANSIOSO', label: 'Ansioso' },
-                                    { id: 'ENOJADO', label: 'Enojado' },
-                                    { id: 'MIEDO', label: 'Miedo' }
-                                ].map(item => e('button', {
-                                    key: item.id, type: 'button',
-                                    onClick: () => { ejecutarVibracion(15); setEmocion(item.id); },
-                                    className: `py-2 rounded-xl flex flex-col items-center justify-center border transition ${emocion === item.id ? 'bg-bgInput border-gold text-white' : 'bg-bgInput/40 border-transparent text-gray-400'}`
-                                },
-                                    e('img', { src: URL_CARITAS[item.id], alt: item.label, className: 'w-6 h-6 object-contain' }),
-                                    e('span', { className: 'text-[8px] font-bold uppercase mt-1 tracking-wide' }, item.label)
-                                ))
-                            )
-                        ),
-                        e('div', { className: 'grid grid-cols-2 gap-2' },
-                            e('button', { type: 'button', onClick: () => { ejecutarVibracion(20); setEstado('WIN'); }, className: `py-2 rounded-xl text-xs font-bold transition ${estado === 'WIN' ? 'bg-cryptoGreen text-black' : 'bg-bgInput text-gray-400'}` }, 'WIN'),
-                            e('button', { type: 'button', onClick: () => { ejecutarVibracion(20); setEstado('LOSS'); }, className: `py-2 rounded-xl text-xs font-bold transition ${estado === 'LOSS' ? 'bg-cryptoRed text-white' : 'bg-bgInput text-gray-400'}` }, 'LOSS')
-                        ),
-                        e('button', { type: 'submit', className: 'bg-gold text-black font-black py-3 rounded-xl text-xs uppercase tracking-wider' }, 'Guardar en la Nube')
-                    ),
-                    e('div', { className: 'navigator-history shrink-0' },
-                        e('h3', { className: 'text-xs font-black text-gray-500 uppercase tracking-wider mb-2 px-1' }, 'Operaciones del Mes'),
-                        e('div', { className: 'flex flex-col gap-2' },
-                            tradesDelMesActual.map(t => e('div', { key: t.id, className: 'bg-bgCard px-4 py-3 rounded-xl border border-gray-800 flex justify-between items-center' },
-                                e('div', { className: 'flex items-center gap-2' },
-                                    e('span', { className: 'bg-bgInput/60 p-1 rounded-lg flex items-center justify-center w-8 h-8' },
-                                        e('img', { src: URL_CARITAS[t.emocion || 'CALMO'] || URL_CARITAS['CALMO'], alt: 'Emo', className: 'w-5 h-5 object-contain' })
-                                    ),
-                                    e('span', { className: 'text-xs font-black text-white' }, `${t.activo} (Día ${t.dia})`)
-                                ),
-                                e('div', { className: 'flex items-center gap-3' },
-                                    e('span', { className: `font-bold text-xs ${t.resultado >= 0 ? 'text-cryptoGreen' : 'text-cryptoRed'}` }, `$${t.resultado}`),
-                                    e('button', { onClick: () => eliminarTrade(t.docId), className: 'text-gray-500 hover:text-cryptoRed font-bold text-lg px-1' }, '×')
-                                )
-                            ))
-                        )
-                    )
-                ),
-                e('nav', { className: 'absolute bottom-0 left-0 right-0 max-w-md mx-auto bg-bgCard border-t border-gray-800 px-6 py-4 flex justify-between items-center z-50 shadow-[0_-8px_30px_rgba(0,0,0,0.7)]' },
-                    e('button', { onClick: () => { ejecutarVibracion(20); setVista('calendario'); }, className: `flex-1 flex flex-col items-center gap-1 py-1 transition ${vista === 'calendario' ? 'text-gold scale-105' : 'text-gray-300 hover:text-white'}` },
-                        e('span', { className: 'text-[18px]' }, '📅'),
-                        e('span', { className: 'text-[11px] font-black uppercase tracking-wider' }, 'Calendario')
-                    ),
-                    e('button', { onClick: () => { ejecutarVibracion(20); setVista('metricas'); }, className: `flex-1 flex flex-col items-center gap-1 py-1 transition ${vista === 'metricas' ? 'text-gold scale-105' : 'text-gray-300 hover:text-white'}` },
-                        e('span', { className: 'text-[18px]' }, '📊'),
-                        e('span', { className: 'text-[11px] font-black uppercase tracking-wider' }, 'Métricas')
-                    ),
-                    e('button', { onClick: () => { ejecutarVibracion(20); setMostrarTerminos(true); }, className: 'flex-1 flex flex-col items-center gap-1 py-1 text-gray-300 hover:text-white transition' },
-                        e('span', { className: 'text-[18px]' }, '📜'),
-                        e('span', { className: 'text-[11px] font-black uppercase tracking-wider text-center leading-tight' }, 'Legal')
-                    )
-                ),
-                mostrarTerminos && e('div', { className: 'fixed inset-0 bg-black/80 flex items-center justify-center z-[100] p-6 animate-fade-in' },
-                    e('div', { className: 'bg-bgCard w-full max-w-sm rounded-2xl border border-gray-800 flex flex-col max-h-[80vh] shadow-2xl' },
-                        e('div', { className: 'p-4 border-b border-gray-800 flex justify-between items-center' },
-                            e('h3', { className: 'text-xs font-black tracking-widest uppercase text-gold' }, 'Información Legal'),
-                            e('button', { onClick: () => { ejecutarVibracion(15); setMostrarTerminos(false); }, className: 'text-gray-400 hover:text-white text-xl font-bold px-2' }, '×')
-                        ),
-                        e('div', { className: 'p-4 overflow-y-auto text-[11px] text-gray-400 space-y-4 font-mono leading-relaxed' },
-                            e('div', null,
-                                e('h4', { className: 'text-white font-bold uppercase text-[11px] tracking-wider mb-1' }, 'Términos y Condiciones'),
-                                e('p', { className: 'mb-2' }, e('span', { className: 'text-gray-300 font-bold' }, '1. Aceptación: '), 'Al utilizar este Trading Journal en la nube, el usuario acepta de manera estricta todas las pautas descritas en este documento.'),
-                                e('p', { className: 'mb-2' }, e('span', { className: 'text-gray-300 font-bold' }, '2. Naturaleza del Servicio: '), 'Esta aplicación funciona exclusivamente como una bitácora o diario de seguimiento personal. Bajo ninguna circunstancia constituye, provee o reemplaza asesoría financiera, señales de inversión ni recomendaciones de compra/venta de activos.'),
-                                e('p', { className: 'mb-2' }, e('span', { className: 'text-gray-300 font-bold' }, '3. Responsabilidad: '), 'El trading en mercados financieros conlleva un alto riesgo. El usuario es el único responsable de sus decisiones, ganancias y pérdidas económicas generadas en su operatoria diaria.')
-                            ),
-                            e('hr', { className: 'border-gray-800 my-2' }),
-                            e('div', null,
-                                e('h4', { className: 'text-gold font-bold uppercase text-[11px] tracking-wider mb-1' }, 'Política de Privacidad y Protección de Datos Personales'),
-                                e('p', { className: 'mb-2' }, 'En Trading Journal Cloud nos tomamos muy en serio la privacidad de su información.'),
-                                e('p', { className: 'mb-2' }, 'Los datos recolectados (correo electrónico de registro y bitácora de operaciones) son almacenados de forma segura mediante la infraestructura de Google Firebase con el único propósito de sincronizar su cuenta y permitirle visualizar sus métricas en tiempo real.'),
-                                e('p', { className: 'mb-2' }, 'No vendemos, transferimos ni compartimos sus datos personales ni su historial de trading con ninguna empresa, tercero o entidad externa. Usted conserva el derecho absoluto sobre su información y puede solicitar la eliminación de su cuenta y todos sus registros asociados en cualquier momento desde la configuración de la aplicación.')
-                            )
-                        ),
-                        e('div', { className: 'p-3 border-t border-gray-800 bg-bgMain/40 text-center' },
-                            e('button', { onClick: () => { ejecutarVibracion(20); setMostrarTerminos(false); }, className: 'w-full bg-gold text-black font-black text-xs py-2.5 rounded-xl uppercase tracking-wider' }, 'Entendido y Aceptar')
-                        )
-                    )
-                )
+            return (
+                <div className="h-screen max-w-md mx-auto bg-bgMain flex flex-col overflow-hidden relative">
+                    <header className="bg-bgMain px-4 py-4 border-b border-gray-800 flex justify-between items-center z-50 shrink-0">
+                        <div className="flex items-center gap-2">
+                            <div className="w-2.5 h-2.5 bg-cryptoGreen rounded-full"></div>
+                            <h1 className="text-base font-black tracking-wider uppercase">Trading Journal</h1>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <a href="https://www.facebook.com/share/g/1BBVwh32q1/" target="_blank" rel="noopener noreferrer" onClick={() => ejecutarVibracion(20)} className="text-[9px] text-white font-black bg-blue-600/20 border border-blue-500/30 px-2 py-1 rounded-lg hover:bg-blue-600/40 transition">
+                                COMUNIDAD 👥
+                            </a>
+                            <button onClick={handleLogout} className="text-[9px] text-cryptoRed font-bold bg-cryptoRed/10 border border-cryptoRed/20 px-2 py-1 rounded-lg">
+                                CERRAR SESIÓN
+                            </button>
+                        </div>
+                    </header>
+
+                    <main className="p-4 flex flex-col gap-5 flex-1 overflow-y-auto pb-28">
+                        <div className="bg-bgCard rounded-2xl border border-gray-800 p-4 shadow-xl shrink-0">
+                            <div className="flex justify-between items-center mb-4">
+                                <div className="flex items-center gap-2">
+                                    <button type="button" onClick={() => { ejecutarVibracion(15); setMesVista(mesVista === 0 ? 11 : mesVista - 1); }} className="w-8 h-8 rounded-lg bg-bgInput flex items-center justify-center font-bold text-gray-400">&lt;</button>
+                                    <h2 className="text-sm font-black text-white uppercase tracking-wide min-w-[110px] text-center">
+                                        {nombreMeses[mesVista]} <span className="text-gray-500 font-mono text-xs">{añoVista}</span>
+                                    </h2>
+                                    <button type="button" onClick={() => { ejecutarVibracion(15); setMesVista(mesVista === 11 ? 0 : mesVista + 1); }} className="w-8 h-8 rounded-lg bg-bgInput flex items-center justify-center font-bold text-gray-400">&gt;</button>
+                                </div>
+                                <span className={`text-xs font-bold font-mono px-2 py-1 rounded ${totalPnlMes >= 0 ? 'text-cryptoGreen bg-cryptoGreen/10' : 'text-cryptoRed bg-cryptoRed/10'}`}>
+                                    ${Number(totalPnlMes).toFixed(2)}
+                                </span>
+                            </div>
+
+                            {vista === 'calendario' ? (
+                                <div>
+                                    <div className="grid grid-cols-7 gap-1 text-center mb-1">
+                                        {diasSemana.map(d => <span key={d} className="text-[9px] text-gray-500 font-bold">{d}</span>)}
+                                    </div>
+                                    <div className="grid grid-cols-7 gap-1.5">
+                                        {Array(primerDiaIndex).fill(null).map((_, i) => <div key={i}></div>)}
+                                        {Array(totalDiasMes).fill(null).map((_, index) => {
+                                            const nroDia = index + 1;
+                                            const dataDia = obtenerDataDia(nroDia);
+                                            return (
+                                                <div key={nroDia} onClick={() => { ejecutarVibracion(25); setDiaSeleccionado(nroDia); }} className={`aspect-square rounded-lg flex flex-col justify-between p-1 text-[10px] cursor-pointer ${dataDia ? (dataDia.pnl >= 0 ? 'bg-cryptoGreen text-black font-bold' : 'bg-cryptoRed text-white font-bold') : 'bg-bgInput/40 text-gray-400'} ${diaSeleccionado === nroDia ? 'ring-2 ring-gold' : ''}`}>
+                                                    <span>{nroDia}</span>
+                                                    {dataDia && <span className="text-[7px] truncate">{dataDia.pnl >= 0 ? '+' : ''}{Number(dataDia.pnl).toFixed(1)}</span>}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="w-full relative h-[180px]"><canvas ref={chartRef}></canvas></div>
+                            )}
+                        </div>
+
+                        {vista === 'metricas' && (
+                            <div className="flex flex-col gap-2 shrink-0">
+                                <div className="grid grid-cols-2 gap-2">
+                                    <div className="bg-bgCard p-3 rounded-xl border border-gray-800">
+                                        <span className="text-[9px] text-gray-500 font-bold block">PnL MES</span>
+                                        <span className="text-sm font-black text-white">${Number(totalPnlMes).toFixed(2)}</span>
+                                    </div>
+                                    <div className="bg-bgCard p-3 rounded-xl border border-gold/20">
+                                        <span className="text-[9px] text-gold font-bold block">ACUMULADO</span>
+                                        <span className="text-sm font-black text-white">${Number(totalPnlAcumulado).toFixed(2)}</span>
+                                    </div>
+                                </div>
+                                <div className="bg-bgCard p-3 rounded-xl border border-gray-800 flex items-center justify-between">
+                                    <div>
+                                        <span className="text-[9px] text-gray-400 font-bold block uppercase tracking-wider">Métrica Psicotrading</span>
+                                        <span className="text-xs font-black text-white block mt-0.5">Emoción Dominante</span>
+                                        <span className="text-[10px] text-gray-500 font-medium">{emocionDominante.texto}</span>
+                                    </div>
+                                    <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl bg-bgInput">
+                                        {emocionDominante.key !== 'VACIO' ? TEXTO_EMOJIS[emocionDominante.key] : '❔'}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {vista === 'calendario' && (
+                            <form onSubmit={agregarTrade} className="bg-bgCard p-4 rounded-2xl border border-gray-800 flex flex-col gap-3 shrink-0">
+                                <div className="grid grid-cols-2 gap-2">
+                                    <input type="text" placeholder="Activo (BTC)" value={activo} onChange={(e) => setActivo(e.target.value)} className="bg-bgInput text-white px-3 py-2.5 rounded-xl text-xs font-bold outline-none"/>
+                                    <input type="number" step="any" placeholder="Resultado USD" value={resultado} onChange={(e) => setResultado(e.target.value)} className="bg-bgInput text-white px-3 py-2.5 rounded-xl text-xs font-bold outline-none"/>
+                                </div>
+                                <div className="flex flex-col gap-1.5">
+                                    <span className="text-[10px] text-gray-500 font-bold uppercase px-1">Psicotrading (Estado Emocional)</span>
+                                    <div className="grid grid-cols-4 gap-1.5">
+                                        {[
+                                            { id: 'CALMO', label: 'Calmo' },
+                                            { id: 'ANSIOSO', label: 'Ansioso' },
+                                            { id: 'ENOJADO', label: 'Enojado' },
+                                            { id: 'MIEDO', label: 'Miedo' }
+                                        ].map(item => (
+                                            <button key={item.id} type="button" onClick={() => { ejecutarVibracion(15); setEmocion(item.id); }} className={`py-2 rounded-xl flex flex-col items-center justify-center border transition ${emocion === item.id ? 'bg-bgInput border-gold text-white' : 'bg-bgInput/40 border-transparent text-gray-400'}`}>
+                                                <span className="text-2xl mb-1">{TEXTO_EMOJIS[item.id]}</span>
+                                                <span className="text-[8px] font-bold uppercase tracking-wide">{item.label}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <button type="button" onClick={() => { ejecutarVibracion(20); setEstado('WIN'); }} className={`py-2 rounded-xl text-xs font-bold transition ${estado === 'WIN' ? 'bg-cryptoGreen text-black' : 'bg-bgInput text-gray-400'}`}>WIN</button>
+                                    <button type="button" onClick={() => { ejecutarVibracion(20); setEstado('LOSS'); }} className={`py-2 rounded-xl text-xs font-bold transition ${estado === 'LOSS' ? 'bg-cryptoRed text-white' : 'bg-bgInput text-gray-400'}`}>LOSS</button>
+                                </div>
+                                <button type="submit" className="bg-gold text-black font-black py-3 rounded-xl text-xs uppercase tracking-wider">Guardar en la Nube</button>
+                            </form>
+                        )}
+
+                        <div className="shrink-0">
+                            <h3 className="text-xs font-black text-gray-500 uppercase tracking-wider mb-2 px-1">Operaciones del Mes</h3>
+                            <div className="flex flex-col gap-2">
+                                {tradesDelMesActual.map(t => (
+                                    <div key={t.id} className="bg-bgCard px-4 py-3 rounded-xl border border-gray-800 flex justify-between items-center">
+                                        <div className="flex items-center gap-2">
+                                            <span className="bg-bgInput/60 p-1 rounded-lg flex items-center justify-center w-8 h-8 text-lg">
+                                                {TEXTO_EMOJIS[t.emocion || 'CALMO'] || TEXTO_EMOJIS['CALMO']}
+                                            </span>
+                                            <span className="text-xs font-black text-white">{t.activo} (Día {t.dia})</span>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            <span className={`font-bold text-xs ${t.resultado >= 0 ? 'text-cryptoGreen' : 'text-cryptoRed'}`}>${Number(t.resultado).toFixed(2)}</span>
+                                            <button onClick={() => eliminarTrade(t.docId)} className="text-gray-500 hover:text-cryptoRed font-bold text-lg px-1">&times;</button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </main>
+
+                    <nav className="absolute bottom-0 left-0 right-0 max-w-md mx-auto bg-bgCard border-t border-gray-800 px-6 py-4 flex justify-between items-center z-50 shadow-[0_-8px_30px_rgba(0,0,0,0.7)]">
+                        <button onClick={() => { ejecutarVibracion(20); setVista('calendario'); }} className={`flex-1 flex flex-col items-center gap-1 py-1 transition ${vista === 'calendario' ? 'text-gold scale-105' : 'text-gray-300 hover:text-white'}`}>
+                            <span className="text-[18px]">📅</span>
+                            <span className="text-[11px] font-black uppercase tracking-wider">Calendario</span>
+                        </button>
+                        <button onClick={() => { ejecutarVibracion(20); setVista('metricas'); }} className={`flex-1 flex flex-col items-center gap-1 py-1 transition ${vista === 'metricas' ? 'text-gold scale-105' : 'text-gray-300 hover:text-white'}`}>
+                            <span className="text-[18px]">📊</span>
+                            <span className="text-[11px] font-black uppercase tracking-wider">Métricas</span>
+                        </button>
+                        <button onClick={() => { ejecutarVibracion(20); setMostrarTerminos(true); }} className="flex-1 flex flex-col items-center gap-1 py-1 text-gray-300 hover:text-white transition">
+                            <span className="text-[18px]">📜</span>
+                            <span className="text-[11px] font-black uppercase tracking-wider text-center leading-tight">Legal</span>
+                        </button>
+                    </nav>
+
+                    {mostrarTerminos && (
+                        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[100] p-6 animate-fade-in">
+                            <div className="bg-bgCard w-full max-w-sm rounded-2xl border border-gray-800 flex flex-col max-h-[80vh] shadow-2xl">
+                                <div className="p-4 border-b border-gray-800 flex justify-between items-center">
+                                    <h3 className="text-xs font-black tracking-widest uppercase text-gold">Información Legal</h3>
+                                    <button onClick={() => { ejecutarVibracion(15); setMostrarTerminos(false); }} className="text-gray-400 hover:text-white text-xl font-bold px-2">&times;</button>
+                                </div>
+                                <div className="p-4 overflow-y-auto text-[11px] text-gray-400 space-y-4 font-mono leading-relaxed">
+                                    <div>
+                                        <h4 className="text-white font-bold uppercase text-[11px] tracking-wider mb-1">Términos y Condiciones</h4>
+                                        <p className="mb-2"><span className="text-gray-300 font-bold">1. Aceptación:</span> Al utilizar este Trading Journal en la nube, el usuario acepta de manera estricta todas las pautas descritas en este documento.</p>
+                                        <p className="mb-2"><span className="text-gray-300 font-bold">2. Naturaleza del Servicio:</span> Esta aplicación funciona exclusivamente como una bitácora o diario de seguimiento personal. Bajo ninguna circunstancia constituye, provee o reemplaza asesoría financiera, señales de inversión ni recomendaciones de compra/venta de activos.</p>
+                                        <p className="mb-2"><span className="text-gray-300 font-bold">3. Responsabilidad:</span> El trading en mercados financieros conlleva un alto riesgo. El usuario es el único responsable de sus decisiones, ganancias y pérdidas económicas generadas en su operatoria diaria.</p>
+                                    </div>
+                                    <hr className="border-gray-800 my-2" />
+                                    <div>
+                                        <h4 className="text-gold font-bold uppercase text-[11px] tracking-wider mb-1">Política de Privacidad y Protección de Datos Personales</h4>
+                                        <p className="mb-2">En Trading Journal Cloud nos tomamos muy en serio la privacidad de su información.</p>
+                                        <p className="mb-2">Los datos recolectados (correo electrónico de registro y bitácora de operaciones) son almacenados de forma segura mediante la infraestructura de Google Firebase con el único propósito de sincronizar su cuenta y permitirle visualizar sus métricas en tiempo real.</p>
+                                        <p className="mb-2">No vendemos, transferimos ni compartimos sus datos personales ni su historial de trading con ninguna empresa, tercero o entidad externa. Usted conserva el derecho absoluto sobre su información y puede solicitar la eliminación de su cuenta y todos sus registros asociados en cualquier momento desde la configuración de la aplicación.</p>
+                                    </div>
+                                </div>
+                                <div className="p-3 border-t border-gray-800 bg-bgMain/40 text-center">
+                                    <button onClick={() => { ejecutarVibracion(20); setMostrarTerminos(false); }} className="w-full bg-gold text-black font-black text-xs py-2.5 rounded-xl uppercase tracking-wider">Entendido y Aceptar</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
             );
         }
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(e(App));
+        root.render(<App />);
     </script>
 </body>
 </html>
