@@ -122,6 +122,12 @@
                     <input type="text" id="trade-activo" placeholder="Activo (BTC)" required class="bg-bgInput text-white px-3 py-2.5 rounded-xl text-xs font-bold outline-none">
                     <input type="number" step="any" id="trade-resultado" placeholder="Resultado USD" required class="bg-bgInput text-white px-3 py-2.5 rounded-xl text-xs font-bold outline-none">
                 </div>
+                <!-- NUEVOS CAMPOS: SL, TP, BE -->
+                <div class="grid grid-cols-3 gap-2">
+                    <input type="number" step="any" id="trade-sl" placeholder="Stop Loss" class="bg-bgInput text-white px-2 py-2 rounded-xl text-[11px] font-bold outline-none">
+                    <input type="number" step="any" id="trade-tp" placeholder="Take Profit" class="bg-bgInput text-white px-2 py-2 rounded-xl text-[11px] font-bold outline-none">
+                    <input type="number" step="any" id="trade-be" placeholder="Break Even" class="bg-bgInput text-white px-2 py-2 rounded-xl text-[11px] font-bold outline-none">
+                </div>
                 <div class="flex flex-col gap-1.5">
                     <span class="text-[10px] text-gray-500 font-bold uppercase px-1">Psicotrading (Estado Emocional)</span>
                     <div class="grid grid-cols-4 gap-1.5">
@@ -226,8 +232,8 @@
         let añoVista = hoy.getFullYear();
         let diaSeleccionado = hoy.getDate();
         
-        let vistaActual = 'calendario'; // 'calendario' o 'metricas'
-        let estadoSeleccionado = 'WIN'; // 'WIN' o 'LOSS'
+        let vistaActual = 'calendario'; 
+        let estadoSeleccionado = 'WIN'; 
         let emocionSeleccionada = 'CALMO';
         let chartInstance = null;
 
@@ -392,6 +398,9 @@
             event.preventDefault();
             const activoInput = document.getElementById('trade-activo');
             const resultadoInput = document.getElementById('trade-resultado');
+            const slInput = document.getElementById('trade-sl');
+            const tpInput = document.getElementById('trade-tp');
+            const beInput = document.getElementById('trade-be');
             
             const activo = activoInput.value.toUpperCase();
             const monto = Math.abs(parseFloat(resultadoInput.value));
@@ -406,7 +415,10 @@
                 emocion: emocionSeleccionada,
                 dia: parseInt(diaSeleccionado),
                 mes: mesVista,
-                año: añoVista
+                año: añoVista,
+                sl: slInput.value ? parseFloat(slInput.value) : null,
+                tp: tpInput.value ? parseFloat(tpInput.value) : null,
+                be: beInput.value ? parseFloat(beInput.value) : null
             };
 
             try {
@@ -419,6 +431,9 @@
                 }
                 activoInput.value = '';
                 resultadoInput.value = '';
+                slInput.value = '';
+                tpInput.value = '';
+                beInput.value = '';
             } catch (e) { console.error(e); }
         });
 
@@ -433,12 +448,10 @@
         function renderizarTodo() {
             monthTitle.innerHTML = `${NOMBRE_MESES[mesVista]} <span class="text-gray-500 font-mono text-xs">${añoVista}</span>`;
 
-            // Filtrar operaciones
             const tradesDelMes = trades.filter(t => t.mes === mesVista && t.año === añoVista);
             const totalPnlMes = tradesDelMes.reduce((acc, t) => acc + t.resultado, 0);
             const totalPnlAcumulado = trades.reduce((acc, t) => acc + t.resultado, 0);
 
-            // Actualizar insignias de dinero
             monthPnlBadge.innerText = `$${totalPnlMes.toFixed(2)}`;
             if (totalPnlMes >= 0) {
                 monthPnlBadge.className = "text-xs font-bold font-mono px-2 py-1 rounded text-cryptoGreen bg-cryptoGreen/10";
@@ -446,7 +459,6 @@
                 monthPnlBadge.className = "text-xs font-bold font-mono px-2 py-1 rounded text-cryptoRed bg-cryptoRed/10";
             }
 
-            // Renderizar Calendario
             calendarGrid.innerHTML = '';
             const primerDiaIndex = new Date(añoVista, mesVista, 1).getDay();
             const totalDiasMes = new Date(añoVista, mesVista + 1, 0).getDate();
@@ -479,30 +491,43 @@
                 calendarGrid.appendChild(celda);
             }
 
-            // Renderizar Lista de Operaciones inferiores del mes
             tradesList.innerHTML = '';
             tradesDelMes.forEach(t => {
                 const item = document.createElement('div');
-                item.className = "bg-bgCard px-4 py-3 rounded-xl border border-gray-800 flex justify-between items-center";
+                item.className = "bg-bgCard px-4 py-3 rounded-xl border border-gray-800 flex flex-col gap-1";
+                
+                // Generar badges condicionales de SL, TP y BE si existen
+                let targetsHtml = '';
+                if(t.sl || t.tp || t.be) {
+                    targetsHtml = `<div class="flex gap-1.5 mt-0.5 font-mono text-[8px] font-bold">`;
+                    if(t.sl) targetsHtml += `<span class="text-cryptoRed bg-cryptoRed/10 px-1 py-0.5 rounded">SL: ${t.sl}</span>`;
+                    if(t.tp) targetsHtml += `<span class="text-cryptoGreen bg-cryptoGreen/10 px-1 py-0.5 rounded">TP: ${t.tp}</span>`;
+                    if(t.be) targetsHtml += `<span class="text-gold bg-gold/10 px-1 py-0.5 rounded">BE: ${t.be}</span>`;
+                    targetsHtml += `</div>`;
+                }
+
                 item.innerHTML = `
-                    <div class="flex items-center gap-2">
-                        <span class="bg-bgInput/60 p-1 rounded-lg flex items-center justify-center w-8 h-8 text-lg">${TEXTO_EMOJIS[t.emocion || 'CALMO']}</span>
-                        <span class="text-xs font-black text-white">${t.activo} (Día ${t.dia})</span>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <span class="font-bold text-xs ${t.resultado >= 0 ? 'text-cryptoGreen' : 'text-cryptoRed'}">$${t.resultado.toFixed(2)}</span>
-                        <button class="delete-trade-btn text-gray-500 hover:text-cryptoRed font-bold text-lg px-1" data-id="${t.docId}">&times;</button>
+                    <div class="flex justify-between items-center w-full">
+                        <div class="flex items-center gap-2">
+                            <span class="bg-bgInput/60 p-1 rounded-lg flex items-center justify-center w-8 h-8 text-lg">${TEXTO_EMOJIS[t.emocion || 'CALMO']}</span>
+                            <div class="flex flex-col">
+                                <span class="text-xs font-black text-white">${t.activo} (Día ${t.dia})</span>
+                                ${targetsHtml}
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="font-bold text-xs ${t.resultado >= 0 ? 'text-cryptoGreen' : 'text-cryptoRed'}">$${t.resultado.toFixed(2)}</span>
+                            <button class="delete-trade-btn text-gray-500 hover:text-cryptoRed font-bold text-lg px-1" data-id="${t.docId}">&times;</button>
+                        </div>
                     </div>
                 `;
                 item.querySelector('.delete-trade-btn').addEventListener('click', () => eliminarTrade(t.docId));
                 tradesList.appendChild(item);
             });
 
-            // Actualizar Métricas si la vista está activa
             widgetPnlMes.innerText = `$${totalPnlMes.toFixed(2)}`;
             widgetPnlAcumulado.innerText = `$${totalPnlAcumulado.toFixed(2)}`;
 
-            // Calcular Emoción Dominante
             if (tradesDelMes.length === 0) {
                 widgetEmocionTexto.innerText = 'Sin datos';
                 widgetEmocionEmoji.innerText = '❔';
@@ -515,7 +540,6 @@
                 widgetEmocionEmoji.innerText = TEXTO_EMOJIS[maxEmo];
             }
 
-            // Actualizar Gráfico Lineal
             if (vistaActual === 'metricas') {
                 renderizarGrafico();
             }
@@ -589,7 +613,7 @@
 
         navLegal.addEventListener('click', () => { ejecutarVibracion(20); legalModal.classList.remove('hidden-view'); });
         document.getElementById('close-legal-btn').addEventListener('click', () => { ejecutarVibracion(15); legalModal.classList.add('hidden-view'); });
-        document.getElementById('accept-legal-btn').addEventListener('click', () => { ejecutarVibracion(20); legalModal.classList.add('hidden-view'); });
+        document.getElementById('accept-legal-btn').addEventListener('click', () => { ejecutarVibracion(25); legalModal.classList.add('hidden-view'); });
     </script>
 </body>
 </html>
