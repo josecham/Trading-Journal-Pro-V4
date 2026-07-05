@@ -336,7 +336,7 @@
 
             unsubscribeFirestore = db.collection('trades')
                 .where('userId', '==', usuarioActual.uid)
-                .orderBy('__name__', 'desc')
+                .orderBy('id', 'desc')
                 .onSnapshot((snapshot) => {
                     trades = snapshot.docs.map(doc => ({ docId: doc.id, ...doc.data() }));
                     renderizarTodo();
