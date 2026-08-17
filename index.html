@@ -95,7 +95,8 @@
                 </div>
             </div>
 
-            <div id="metrics-widgets" class="flex flex-col gap-2 shrink-0 hidden-view">
+            <!-- MÉTRICAS Y WIDGETS EXPANDIDOS -->
+            <div id="metrics-widgets" class="flex flex-col gap-2 shrink-0">
                 <div class="grid grid-cols-2 gap-2">
                     <div class="bg-bgCard p-3 rounded-xl border border-gray-800">
                         <span class="text-[9px] text-gray-500 font-bold block">PnL MES</span>
@@ -106,13 +107,39 @@
                         <span id="widget-pnl-acumulado" class="text-sm font-black text-white">$0.00</span>
                     </div>
                 </div>
-                <div class="bg-bgCard p-3 rounded-xl border border-gray-800 flex items-center justify-between">
-                    <div>
-                        <span class="text-[9px] text-gray-400 font-bold block uppercase tracking-wider">Métrica Psicotrading</span>
-                        <span class="text-xs font-black text-white block mt-0.5">Emoción Dominante</span>
-                        <span id="widget-emocion-texto" class="text-[10px] text-gray-500 font-medium">Sin datos</span>
+
+                <!-- NUEVAS MÉTRICAS FINANCIERAS Y DE RIESGO -->
+                <div class="grid grid-cols-3 gap-2">
+                    <div class="bg-bgCard p-2.5 rounded-xl border border-gray-800 text-center">
+                        <span class="text-[8px] text-gray-400 font-bold block uppercase">Win Rate</span>
+                        <span id="widget-winrate" class="text-xs font-black text-cryptoGreen">0%</span>
                     </div>
-                    <div id="widget-emocion-emoji" class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl bg-bgInput">❔</div>
+                    <div class="bg-bgCard p-2.5 rounded-xl border border-gray-800 text-center">
+                        <span class="text-[8px] text-gray-400 font-bold block uppercase">Profit Factor</span>
+                        <span id="widget-pf" class="text-xs font-black text-gold">0.00</span>
+                    </div>
+                    <div class="bg-bgCard p-2.5 rounded-xl border border-gray-800 text-center">
+                        <span class="text-[8px] text-gray-400 font-bold block uppercase">Avg Win / Loss</span>
+                        <span id="widget-avg-ratio" class="text-[10px] font-mono font-bold text-white">$0 / $0</span>
+                    </div>
+                </div>
+
+                <!-- WIDGET DE PSICOTRADING Y RENDIMIENTO EMOCIONAL -->
+                <div class="bg-bgCard p-3 rounded-xl border border-gray-800 flex flex-col gap-2">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <span class="text-[9px] text-gray-400 font-bold block uppercase tracking-wider">Métrica Psicotrading</span>
+                            <span class="text-xs font-black text-white block mt-0.5">Emoción Dominante</span>
+                            <span id="widget-emocion-texto" class="text-[10px] text-gray-500 font-medium">Sin datos</span>
+                        </div>
+                        <div id="widget-emocion-emoji" class="w-10 h-10 rounded-xl flex items-center justify-center text-xl bg-bgInput">❔</div>
+                    </div>
+                    <div id="emo-breakdown" class="grid grid-cols-4 gap-1 pt-2 border-t border-gray-800/60 text-center text-[8px] font-mono">
+                        <div>😎 <span id="emo-pnl-calmo" class="block font-bold text-gray-400">$0</span></div>
+                        <div>😰 <span id="emo-pnl-ansioso" class="block font-bold text-gray-400">$0</span></div>
+                        <div>😡 <span id="emo-pnl-enojado" class="block font-bold text-gray-400">$0</span></div>
+                        <div>😨 <span id="emo-pnl-miedo" class="block font-bold text-gray-400">$0</span></div>
+                    </div>
                 </div>
             </div>
 
@@ -121,7 +148,6 @@
                     <input type="text" id="trade-activo" placeholder="Activo (BTC)" required class="bg-bgInput text-white px-3 py-2.5 rounded-xl text-xs font-bold outline-none">
                     <input type="number" step="any" id="trade-resultado" placeholder="Resultado USD" required class="bg-bgInput text-white px-3 py-2.5 rounded-xl text-xs font-bold outline-none">
                 </div>
-                <!-- NUEVOS CAMPOS: SL, TP, BE -->
                 <div class="grid grid-cols-3 gap-2">
                     <input type="number" step="any" id="trade-sl" placeholder="Stop Loss" class="bg-bgInput text-white px-2 py-2 rounded-xl text-[11px] font-bold outline-none">
                     <input type="number" step="any" id="trade-tp" placeholder="Take Profit" class="bg-bgInput text-white px-2 py-2 rounded-xl text-[11px] font-bold outline-none">
@@ -177,15 +203,9 @@
                 </div>
                 <div class="p-4 overflow-y-auto text-[11px] text-gray-400 space-y-4 font-mono leading-relaxed">
                     <div>
-                        <h4 class="text-white font-bold uppercase text-[11px] tracking-wider mb-1"></h4>
-                        <p class="mb-2"><span class="text-gray-300 font-bold">Descripción del proyecto:</span>TradingJournalPro es un Módulo de Psicotrading diseñado para conectar la gestión emocional con las métricas del operador. Su objetivo no es registrar qué se opera, sino por qué y en qué estado mental se toma cada decisión, ayudando al trader a detectar sesgos cognitivos, impulsividad y patrones destructivos (como el FOMO, el overtrading o el quitar el Stop Loss) para transformarlos en ejecución disciplinada.</p>
-                        <p class="mb-2"><span class="text-gray-300 font-bold">Aviso de Responsabilidad:</span>TradingJournalPro es un proyecto personal. No proporciona señales de trading, asesoría financiera ni recomendaciones de inversión. Los mercados financieros conllevan un riesgo significativo. Cada usuario es responsable de la gestión de su propio capital.</p>
+                        <p class="mb-2"><span class="text-gray-300 font-bold">Descripción del proyecto:</span> TradingJournalPro es un Módulo de Psicotrading diseñado para conectar la gestión emocional con las métricas del operador.</p>
+                        <p class="mb-2"><span class="text-gray-300 font-bold">Aviso de Responsabilidad:</span> Proyecto personal de registro analítico. No constituye asesoría financiera ni recomendación de inversión.</p>
                     </div>
-                    <hr class="border-gray-800 my-2">
-                    <div>
-                        <h4 class="text-gold font-bold uppercase text-[11px] tracking-wider mb-1"></h4>
-                        <p class="mb-2"></p>
-                        
                 </div>
                 <div class="p-3 border-t border-gray-800 bg-bgMain/40 text-center">
                     <button type="button" id="accept-legal-btn" class="w-full bg-gold text-black font-black text-xs py-2.5 rounded-xl uppercase tracking-wider">Entendido y Aceptar</button>
@@ -199,7 +219,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
     <script>
-        // CONFIGURACIÓN DE FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyAts93tv8WY702grlHPGnh6ID1QeR_3XQc",
             authDomain: "tradingjournalpro-3507c.firebaseapp.com",
@@ -220,7 +239,6 @@
         const MAPA_TEXTOS = { 'CALMO': 'Calmo / Focalizado', 'ANSIOSO': 'Ansioso / Apurado', 'ENOJADO': 'Enojado (Furia)', 'MIEDO': 'Miedo al mercado' };
         const NOMBRE_MESES = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
-        // ESTADO GLOBAL DE LA APLICACIÓN
         let usuarioActual = null;
         let isRegistering = false;
         let trades = [];
@@ -235,7 +253,6 @@
         let emocionSeleccionada = 'CALMO';
         let chartInstance = null;
 
-        // ELEMENTOS DEL DOM
         const authContainer = document.getElementById('auth-container');
         const appContainer = document.getElementById('app-container');
         const authForm = document.getElementById('auth-form');
@@ -259,8 +276,15 @@
         const widgetPnlAcumulado = document.getElementById('widget-pnl-acumulado');
         const widgetEmocionTexto = document.getElementById('widget-emocion-texto');
         const widgetEmocionEmoji = document.getElementById('widget-emocion-emoji');
+        const widgetWinrate = document.getElementById('widget-winrate');
+        const widgetPf = document.getElementById('widget-pf');
+        const widgetAvgRatio = document.getElementById('widget-avg-ratio');
 
-        // EFECTOS DE SONIDO Y VIBRACIÓN
+        const navCalendar = document.getElementById('nav-calendar');
+        const navMetrics = document.getElementById('nav-metrics');
+        const navLegal = document.getElementById('nav-legal');
+        const legalModal = document.getElementById('legal-modal');
+
         const ejecutarVibracion = (patron) => { if (navigator.vibrate) navigator.vibrate(patron); };
 
         const dispararConfeti = () => {
@@ -280,7 +304,6 @@
             setTimeout(() => { container.remove(); }, 4000);
         };
 
-        // ESCUCHADOR DE AUTENTICACIÓN
         auth.onAuthStateChanged((user) => {
             if (user) {
                 usuarioActual = user;
@@ -295,30 +318,21 @@
             }
         });
 
-        // MANEJO DE LOGIN / REGISTRO
         authToggleBtn.addEventListener('click', () => {
             ejecutarVibracion(20);
             isRegistering = !isRegistering;
-            if (isRegistering) {
-                authSubmitBtn.innerText = 'Crear Cuenta Cloud';
-                authToggleBtn.innerText = '¿Ya tenés cuenta? Iniciá sesión';
-            } else {
-                authSubmitBtn.innerText = 'Ingresar';
-                authToggleBtn.innerText = '¿No tenés cuenta? Registrate gratis';
-            }
+            authSubmitBtn.innerText = isRegistering ? 'Crear Cuenta Cloud' : 'Ingresar';
+            authToggleBtn.innerText = isRegistering ? '¿Ya tenés cuenta? Iniciá sesión' : '¿No tenés cuenta? Registrate gratis';
         });
 
         authForm.addEventListener('submit', async (event) => {
             event.preventDefault();
             authError.classList.add('hidden');
-            const email = authEmail.value;
-            const password = authPassword.value;
-
             try {
                 if (isRegistering) {
-                    await auth.createUserWithEmailAndPassword(email, password);
+                    await auth.createUserWithEmailAndPassword(authEmail.value, authPassword.value);
                 } else {
-                    await auth.signInWithEmailAndPassword(email, password);
+                    await auth.signInWithEmailAndPassword(authEmail.value, authPassword.value);
                 }
                 ejecutarVibracion(40);
             } catch (error) {
@@ -333,11 +347,9 @@
             auth.signOut();
         });
 
-        // CONEXIÓN EN TIEMPO REAL CON FIRESTORE
         let unsubscribeFirestore = null;
         function conectarFirestore() {
             if (unsubscribeFirestore) unsubscribeFirestore();
-
             unsubscribeFirestore = db.collection('trades')
                 .where('userId', '==', usuarioActual.uid)
                 .orderBy('id', 'desc')
@@ -347,7 +359,6 @@
                 }, (err) => console.error(err));
         }
 
-        // CONTROLADORES DE MESES
         document.getElementById('prev-month-btn').addEventListener('click', () => {
             ejecutarVibracion(15);
             if (mesVista === 0) { mesVista = 11; añoVista--; } else { mesVista--; }
@@ -360,7 +371,6 @@
             renderizarTodo();
         });
 
-        // MANEJO DE FORMULARIO DE TRADES
         const emoButtons = document.querySelectorAll('.emo-btn');
         emoButtons.forEach(btn => {
             btn.addEventListener('click', () => {
@@ -442,7 +452,28 @@
             } catch (e) { console.error(e); }
         }
 
-        // SISTEMA DE RENDERIZADO COMPLETO (VANILLA)
+        // CONTROLADORES DE NAVEGACIÓN
+        navCalendar.addEventListener('click', () => {
+            vistaActual = 'calendario';
+            calendarView.classList.remove('hidden-view');
+            chartView.classList.add('hidden-view');
+            navCalendar.className = "flex-1 flex flex-col items-center gap-1 py-1 text-gold scale-105";
+            navMetrics.className = "flex-1 flex flex-col items-center gap-1 py-1 text-gray-300 hover:text-white";
+        });
+
+        navMetrics.addEventListener('click', () => {
+            vistaActual = 'metricas';
+            calendarView.classList.add('hidden-view');
+            chartView.classList.remove('hidden-view');
+            navMetrics.className = "flex-1 flex flex-col items-center gap-1 py-1 text-gold scale-105";
+            navCalendar.className = "flex-1 flex flex-col items-center gap-1 py-1 text-gray-300 hover:text-white";
+            renderizarGrafico();
+        });
+
+        navLegal.addEventListener('click', () => legalModal.classList.remove('hidden-view'));
+        document.getElementById('close-legal-btn').addEventListener('click', () => legalModal.classList.add('hidden-view'));
+        document.getElementById('accept-legal-btn').addEventListener('click', () => legalModal.classList.add('hidden-view'));
+
         function renderizarTodo() {
             monthTitle.innerHTML = `${NOMBRE_MESES[mesVista]} <span class="text-gray-500 font-mono text-xs">${añoVista}</span>`;
 
@@ -451,12 +482,37 @@
             const totalPnlAcumulado = trades.reduce((acc, t) => acc + t.resultado, 0);
 
             monthPnlBadge.innerText = `$${totalPnlMes.toFixed(2)}`;
-            if (totalPnlMes >= 0) {
-                monthPnlBadge.className = "text-xs font-bold font-mono px-2 py-1 rounded text-cryptoGreen bg-cryptoGreen/10";
-            } else {
-                monthPnlBadge.className = "text-xs font-bold font-mono px-2 py-1 rounded text-cryptoRed bg-cryptoRed/10";
-            }
+            monthPnlBadge.className = `text-xs font-bold font-mono px-2 py-1 rounded ${totalPnlMes >= 0 ? 'text-cryptoGreen bg-cryptoGreen/10' : 'text-cryptoRed bg-cryptoRed/10'}`;
 
+            // CÁLCULO DE MÉTRICAS AVANZADAS (MES ACTUAL)
+            const wins = tradesDelMes.filter(t => t.resultado > 0);
+            const losses = tradesDelMes.filter(t => t.resultado < 0);
+            const winRate = tradesDelMes.length > 0 ? ((wins.length / tradesDelMes.length) * 100).toFixed(1) : "0.0";
+            
+            const totalGanado = wins.reduce((acc, t) => acc + t.resultado, 0);
+            const totalPerdido = Math.abs(losses.reduce((acc, t) => acc + t.resultado, 0));
+            const profitFactor = totalPerdido > 0 ? (totalGanado / totalPerdido).toFixed(2) : (totalGanado > 0 ? "∞" : "0.00");
+            
+            const avgWin = wins.length > 0 ? (totalGanado / wins.length).toFixed(0) : "0";
+            const avgLoss = losses.length > 0 ? (totalPerdido / losses.length).toFixed(0) : "0";
+
+            widgetWinrate.innerText = `${winRate}%`;
+            widgetPf.innerText = profitFactor;
+            widgetAvgRatio.innerText = `+$${avgWin} / -$${avgLoss}`;
+
+            // DESGLOSE POR EMOCIÓN
+            const emoPnl = { 'CALMO': 0, 'ANSIOSO': 0, 'ENOJADO': 0, 'MIEDO': 0 };
+            tradesDelMes.forEach(t => {
+                const em = t.emocion || 'CALMO';
+                emoPnl[em] += t.resultado;
+            });
+
+            document.getElementById('emo-pnl-calmo').innerText = `$${emoPnl['CALMO'].toFixed(0)}`;
+            document.getElementById('emo-pnl-ansioso').innerText = `$${emoPnl['ANSIOSO'].toFixed(0)}`;
+            document.getElementById('emo-pnl-enojado').innerText = `$${emoPnl['ENOJADO'].toFixed(0)}`;
+            document.getElementById('emo-pnl-miedo').innerText = `$${emoPnl['MIEDO'].toFixed(0)}`;
+
+            // CALENDARIO
             calendarGrid.innerHTML = '';
             const primerDiaIndex = new Date(añoVista, mesVista, 1).getDay();
             const totalDiasMes = new Date(añoVista, mesVista + 1, 0).getDate();
@@ -469,9 +525,7 @@
                 const tradesDelDia = tradesDelMes.filter(t => t.dia === d);
                 let pnlDia = 0;
                 let jugo = tradesDelDia.length > 0;
-                if (jugo) {
-                    pnlDia = tradesDelDia.reduce((acc, t) => acc + t.resultado, 0);
-                }
+                if (jugo) pnlDia = tradesDelDia.reduce((acc, t) => acc + t.resultado, 0);
 
                 const celda = document.createElement('div');
                 celda.className = `aspect-square rounded-lg flex flex-col justify-between p-1 text-[10px] cursor-pointer ${jugo ? (pnlDia >= 0 ? 'bg-cryptoGreen text-black font-bold' : 'bg-cryptoRed text-white font-bold') : 'bg-bgInput/40 text-gray-400'} ${diaSeleccionado === d ? 'ring-2 ring-gold' : ''}`;
@@ -489,12 +543,12 @@
                 calendarGrid.appendChild(celda);
             }
 
+            // LISTA DE TRADES
             tradesList.innerHTML = '';
             tradesDelMes.forEach(t => {
                 const item = document.createElement('div');
                 item.className = "bg-bgCard px-4 py-3 rounded-xl border border-gray-800 flex flex-col gap-1";
                 
-                // Generar badges condicionales de SL, TP y BE si existen
                 let targetsHtml = '';
                 if(t.sl || t.tp || t.be) {
                     targetsHtml = `<div class="flex gap-1.5 mt-0.5 font-mono text-[8px] font-bold">`;
@@ -538,9 +592,7 @@
                 widgetEmocionEmoji.innerText = TEXTO_EMOJIS[maxEmo];
             }
 
-            if (vistaActual === 'metricas') {
-                renderizarGrafico();
-            }
+            if (vistaActual === 'metricas') renderizarGrafico();
         }
 
         function renderizarGrafico() {
@@ -554,64 +606,38 @@
             const puntos = [0]; 
             const labels = ["Inicio"];
             
-            crono.forEach(t => { 
+            crono.forEach((t, index) => { 
                 bal += t.resultado; 
-                puntos.push(bal); 
-                labels.push(`${t.dia}/${t.mes + 1}`); 
+                puntos.push(bal);
+                labels.push(`#${index + 1}`);
             });
 
-            chartInstance = new Chart(canvasCtx.getContext('2d'), {
+            chartInstance = new Chart(canvasCtx, {
                 type: 'line',
-                data: { 
-                    labels, 
-                    datasets: [{ 
-                        data: puntos, 
-                        borderColor: bal >= 0 ? '#0ecb81' : '#f6465d', 
-                        backgroundColor: 'rgba(0,0,0,0)', 
-                        borderWidth: 2, 
-                        pointBackgroundColor: '#f0b90b', 
-                        pointRadius: 2, 
-                        tension: 0.1 
-                    }] 
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Curva de Capital',
+                        data: puntos,
+                        borderColor: '#f0b90b',
+                        backgroundColor: 'rgba(240, 185, 11, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 2
+                    }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { ticks: { color: '#6b7280', font: { size: 9 } }, grid: { display: false } },
+                        y: { ticks: { color: '#6b7280', font: { size: 9 } }, grid: { color: '#1f2937' } }
+                    }
+                }
             });
         }
-
-        // NAVEGACIÓN ENTRE SECCIONES
-        const navCalendar = document.getElementById('nav-calendar');
-        const navMetrics = document.getElementById('nav-metrics');
-        const navLegal = document.getElementById('nav-legal');
-        const legalModal = document.getElementById('legal-modal');
-
-        navCalendar.addEventListener('click', () => {
-            ejecutarVibracion(20);
-            vistaActual = 'calendario';
-            navCalendar.className = "flex-1 flex flex-col items-center gap-1 py-1 text-gold scale-105";
-            navMetrics.className = "flex-1 flex flex-col items-center gap-1 py-1 text-gray-300 hover:text-white";
-            
-            calendarView.classList.remove('hidden-view');
-            tradeForm.classList.remove('hidden-view');
-            chartView.classList.add('hidden-view');
-            metricsWidgets.classList.add('hidden-view');
-        });
-
-        navMetrics.addEventListener('click', () => {
-            ejecutarVibracion(20);
-            vistaActual = 'metricas';
-            navMetrics.className = "flex-1 flex flex-col items-center gap-1 py-1 text-gold scale-105";
-            navCalendar.className = "flex-1 flex flex-col items-center gap-1 py-1 text-gray-300 hover:text-white";
-            
-            calendarView.classList.add('hidden-view');
-            tradeForm.classList.add('hidden-view');
-            chartView.classList.remove('hidden-view');
-            metricsWidgets.classList.remove('hidden-view');
-            renderizarGrafico();
-        });
-
-        navLegal.addEventListener('click', () => { ejecutarVibracion(20); legalModal.classList.remove('hidden-view'); });
-        document.getElementById('close-legal-btn').addEventListener('click', () => { ejecutarVibracion(15); legalModal.classList.add('hidden-view'); });
-        document.getElementById('accept-legal-btn').addEventListener('click', () => { ejecutarVibracion(25); legalModal.classList.add('hidden-view'); });
     </script>
 </body>
 </html>
